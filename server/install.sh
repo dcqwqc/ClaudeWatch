@@ -330,7 +330,7 @@ _keys_dir() { echo "$TARGET_DIR/keys"; }
 _list_keys() {
     local keys_dir; keys_dir=$(_keys_dir)
     local found=false
-    for f in "$keys_dir"/*.pub 2>/dev/null; do
+    for f in "$keys_dir"/*.pub; do
         [ -f "$f" ] || continue
         local label; label=$(basename "$f" .pub)
         echo "     • $label  →  ${f%.pub}"
@@ -354,9 +354,14 @@ _add_pub_to_authorized_keys() {
 
 _remove_pub_from_authorized_keys() {
     local pub_file="$1"
+    if [ ! -f "$HOME/.ssh/authorized_keys" ]; then
+        warn "~/.ssh/authorized_keys not found — nothing to remove."
+        return
+    fi
     local pub_key; pub_key=$(cat "$pub_file")
     local tmp; tmp=$(mktemp)
-    grep -vF "$pub_key" "$HOME/.ssh/authorized_keys" > "$tmp" && mv "$tmp" "$HOME/.ssh/authorized_keys"
+    # Use ; not && so mv runs even when grep exits 1 (key was the only entry → no output lines)
+    grep -vF "$pub_key" "$HOME/.ssh/authorized_keys" > "$tmp"; mv "$tmp" "$HOME/.ssh/authorized_keys"
     info "Public key removed from ~/.ssh/authorized_keys"
 }
 
@@ -515,8 +520,6 @@ _setup_conn_domain() {
     echo "   even when your home internet IP changes. Works from anywhere."
     echo ""
 
-    if ! command_exists ping; then true; fi  # no-op, just for flow
-
     echo -e "   ${C_BOLD}Don't have a domain yet?${C_RESET} Get a free one:"
     echo -e "   • DuckDNS    ${C_CYAN}https://www.duckdns.org${C_RESET}"
     echo "                Sign up, pick a name (e.g. mywatch.duckdns.org),"
@@ -566,7 +569,7 @@ _setup_conn_tailscale() {
         echo "   Log in with the SAME Tailscale account on all devices."
         echo ""
         echo "   Once everything is connected, re-run this step."
-        pause; return
+        return
     fi
 
     info "Tailscale is installed."
@@ -629,6 +632,34 @@ setup_connection() {
     read -r -p "   SSH username on this PC (Enter for '$ssh_user'): " input_user
     [ -n "$input_user" ] && ssh_user="$input_user"
 
+    # Pick SSH key from keys dir
+    local ssh_key_path=""
+    local keys_dir; keys_dir=$(_keys_dir)
+    local key_files=()
+    for kf in "$keys_dir"/*; do
+        [[ -f "$kf" && "$kf" != *.pub ]] && key_files+=("$kf")
+    done
+    if [ ${#key_files[@]} -eq 0 ]; then
+        warn "No SSH keys found — run Step 6 first to generate one."
+        ssh_key_path="(none — run Step 6)"
+    elif [ ${#key_files[@]} -eq 1 ]; then
+        ssh_key_path="${key_files[0]}"
+        info "Using SSH key: $(basename "$ssh_key_path")"
+    else
+        echo ""
+        echo "   Multiple device keys found. Which key should this connection use?"
+        for i in "${!key_files[@]}"; do
+            echo "   [$((i+1))] $(basename "${key_files[$i]}")"
+        done
+        read -r -p "   Choose (1-${#key_files[@]}): " ki
+        if [[ "$ki" =~ ^[0-9]+$ ]] && [ "$ki" -ge 1 ] && [ "$ki" -le "${#key_files[@]}" ]; then
+            ssh_key_path="${key_files[$((ki-1))]}"
+        else
+            ssh_key_path="${key_files[0]}"
+            warn "Invalid choice — defaulting to: $(basename "$ssh_key_path")"
+        fi
+    fi
+
     # Write config
     local config_file="$TARGET_DIR/connection.conf"
     cat > "$config_file" <<EOF
@@ -638,7 +669,7 @@ PRIMARY_PORT=$primary_port
 FALLBACK_HOST=$fallback_host
 FALLBACK_PORT=$fallback_port
 SSH_USER=$ssh_user
-SSH_KEY_PATH=$TARGET_DIR/watch_key
+SSH_KEY_PATH=$ssh_key_path
 EOF
     info "Config saved to: $config_file"
     echo ""
