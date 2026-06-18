@@ -32,8 +32,20 @@ info() { echo -e "   ${C_GREEN}✓${C_RESET} $1"; }
 warn() { echo -e "   ${C_YELLOW}⚠️  $1${C_RESET}"; }
 pause() { read -p "Press [Enter] to return to the main menu..."; }
 command_exists() { command -v "$1" &>/dev/null; }
-# On Windows, check the Windows-native PATH (catches tools just installed by winget)
-win_command_exists() { cmd //c where "$1" &>/dev/null 2>&1; }
+
+# Check if a command is available anywhere (POSIX PATH or Windows PATH).
+# If found only via Windows PATH, inject that directory into the current session
+# so subsequent command_exists calls also succeed.
+resolve_command() {
+    local cmd_name="$1"
+    command_exists "$cmd_name" && return 0
+    $IS_WINDOWS || return 1
+    local win_path; win_path=$(cmd //c where "$cmd_name" 2>/dev/null | head -1 | tr -d '\r\n')
+    [ -z "$win_path" ] && return 1
+    local posix_dir; posix_dir=$(cygpath -u "$(dirname "$win_path")" 2>/dev/null)
+    [ -n "$posix_dir" ] && export PATH="$PATH:$posix_dir"
+    command_exists "$cmd_name"
+}
 
 # --- Self-Updating Logic ---
 self_update() {
@@ -103,30 +115,27 @@ prompt_to_install() {
     fi
 
     info "Running: $install_cmd"
-    eval "$install_cmd"
-    local exit_code=$?
+    # Capture output so we can detect winget's "already at latest" non-zero exit
+    local output; output=$(eval "$install_cmd" 2>&1); local exit_code=$?
+    echo "$output"
 
-    # Success path 1: command exited 0
+    # Success path 1: exited 0
     if [ $exit_code -eq 0 ]; then
         info "'$cmd_name' installed successfully."
         return 0
     fi
 
-    # Success path 2: winget exits non-zero for "already at latest version" —
-    # the tool may already be present, or was just installed but isn't on this
-    # session's PATH yet (Windows registry PATH update requires a new shell).
-    if $IS_WINDOWS; then
-        if command_exists "$cmd_name" || win_command_exists "$cmd_name"; then
-            info "'$cmd_name' is available (already up to date)."
-            # If not in POSIX PATH, locate and add it for this session
-            if ! command_exists "$cmd_name" && win_command_exists "$cmd_name"; then
-                local win_path; win_path=$(cmd //c where "$cmd_name" 2>/dev/null | head -1 | tr -d '\r\n')
-                if [ -n "$win_path" ]; then
-                    local posix_dir; posix_dir=$(cygpath -u "$(dirname "$win_path")" 2>/dev/null)
-                    [ -n "$posix_dir" ] && export PATH="$PATH:$posix_dir" && info "Added '$cmd_name' to current session PATH."
-                fi
-            fi
+    # Success path 2: winget exits non-zero when the package is already at the
+    # latest version. Detect this by checking the output text, then locate the
+    # binary via Windows PATH and inject it into the current POSIX session.
+    if $IS_WINDOWS && echo "$output" | grep -qiE "already installed|No available upgrade|No newer package"; then
+        if resolve_command "$cmd_name"; then
+            info "'$cmd_name' is already installed and up to date."
             return 0
+        else
+            warn "'$cmd_name' is installed by Windows but could not be located."
+            warn "Please restart your terminal and re-run this step."
+            return 1
         fi
     fi
 
@@ -142,14 +151,12 @@ check_prerequisites() {
     local deps=("git:git:sys" "python3:python3:sys" "pip:python3-pip:sys" "npm:npm:sys" "jq:jq:sys")
     for dep in "${deps[@]}"; do
         IFS=":" read -r cmd pkg type <<< "$dep"
-        if ! command_exists "$cmd"; then
-            if prompt_to_install "$cmd" "$pkg" "$type"; then
-                info "$cmd is now installed."
-            else
-                all_ok=false
-            fi
-        else
+        if resolve_command "$cmd"; then
             info "$cmd is already installed."
+        elif prompt_to_install "$cmd" "$pkg" "$type"; then
+            info "$cmd is now installed."
+        else
+            all_ok=false
         fi
     done
     if [ "$all_ok" = false ]; then warn "Some prerequisites are still missing."; else info "All prerequisites are installed."; fi
@@ -276,7 +283,7 @@ setup_hooks() {
     echo "   Claude Code supports 'hooks' — commands that run automatically at"
     echo "   certain moments. This step registers the ClaudeWatch notifier as a"
     echo "   'Stop' hook so your watch buzzes every time Claude finishes a task."
-    if ! command_exists jq; then warn "jq not found. Please run Step 0 first."; pause; return; fi
+    if ! resolve_command jq; then warn "jq not found. Please run Step 0 first."; pause; return; fi
     local settings_file="$HOME/.claude/settings.json"
     local backup_file="$settings_file.bak"
     local hook_cmd="$TARGET_DIR/claude-done-hook.sh"
