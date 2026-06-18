@@ -111,43 +111,46 @@ class SshManager(private val settingsStore: SettingsStore) {
     suspend fun exec(settings: Settings, command: String, timeoutMs: Int = 20_000): ExecResult =
         withContext(Dispatchers.IO) {
             val session = getSession(settings, connectTimeoutMs = 12_000)
+            // ChannelExec does not implement Closeable, so we cannot use .use{}.
+            // Manage the lifecycle manually with try/finally.
+            val channel = session.openChannel("exec") as ChannelExec
             try {
-                (session.openChannel("exec") as ChannelExec).use { channel ->
-                    channel.setCommand(command)
-                    val stderr = ByteArrayOutputStream()
-                    channel.setErrStream(stderr)
+                channel.setCommand(command)
+                val stderr = ByteArrayOutputStream()
+                channel.setErrStream(stderr)
 
-                    channel.inputStream.use { input ->
-                        val stdout = ByteArrayOutputStream()
-                        channel.connect()
+                channel.inputStream.use { input ->
+                    val stdout = ByteArrayOutputStream()
+                    channel.connect()
 
-                        val buf = ByteArray(8192)
-                        val deadline = System.currentTimeMillis() + timeoutMs
-                        while (true) {
-                            while (input.available() > 0) {
-                                val n = input.read(buf)
-                                if (n < 0) break
-                                stdout.write(buf, 0, n)
-                            }
-                            if (channel.isClosed) {
-                                if (input.available() > 0) continue
-                                return@use ExecResult(
-                                    channel.exitStatus,
-                                    stdout.toString("UTF-8"),
-                                    stderr.toString("UTF-8")
-                                )
-                            }
-                            if (System.currentTimeMillis() > deadline) {
-                                throw IOException("SSH exec timed out after ${timeoutMs}ms")
-                            }
-                            Thread.sleep(20)
+                    val buf = ByteArray(8192)
+                    val deadline = System.currentTimeMillis() + timeoutMs
+                    while (true) {
+                        while (input.available() > 0) {
+                            val n = input.read(buf)
+                            if (n < 0) break
+                            stdout.write(buf, 0, n)
                         }
+                        if (channel.isClosed) {
+                            if (input.available() > 0) continue
+                            return@withContext ExecResult(
+                                channel.exitStatus,
+                                stdout.toString("UTF-8"),
+                                stderr.toString("UTF-8")
+                            )
+                        }
+                        if (System.currentTimeMillis() > deadline) {
+                            throw IOException("SSH exec timed out after ${timeoutMs}ms")
+                        }
+                        Thread.sleep(20)
                     }
                 }
             } catch (e: Exception) {
                 // If the session died, clear it so the next attempt starts fresh
                 synchronized(sessionLock) { if (cachedSession === session) cachedSession = null }
                 throw e
+            } finally {
+                channel.disconnect()
             }
         }
 
