@@ -13,7 +13,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import kotlinx.coroutines.delay
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -36,7 +35,19 @@ import io.qwqc.claudewatch.presentation.terminal.TerminalsViewModel
 import io.qwqc.claudewatch.presentation.theme.ClaudePalette
 import io.qwqc.claudewatch.presentation.usage.UsageBars
 import io.qwqc.claudewatch.presentation.usage.UsageViewModel
+import kotlinx.coroutines.delay
 
+/**
+ * The main screen of the application.
+ *
+ * Displays the mascot, usage bars, a list of configured terminals, and navigation
+ * buttons for adding a new terminal or accessing settings.
+ *
+ * @param onOpenTerminal Callback invoked when a terminal row is tapped.
+ * @param onEditTerminal Callback invoked when a terminal's edit button is tapped.
+ * @param onAddTerminal Callback for the "Add terminal" button.
+ * @param onSettings Callback for the "Settings" button.
+ */
 @Composable
 fun HomeScreen(
     onOpenTerminal: (String) -> Unit,
@@ -52,7 +63,8 @@ fun HomeScreen(
     // Auto-refresh usage on every full minute, while Home is on screen.
     LaunchedEffect(Unit) {
         while (true) {
-            delay(60_000 - System.currentTimeMillis() % 60_000)
+            val now = System.currentTimeMillis()
+            delay(60_000 - now % 60_000)
             usageVm.refreshSilently()
         }
     }
@@ -67,15 +79,18 @@ fun HomeScreen(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            // Dancing Claude
-            item { ClaudeMascot(mood = MascotMood.Idle, modifier = Modifier.size(96.dp)) }
+            item {
+                ClaudeMascot(
+                    mood = MascotMood.Idle, // Mood is currently static
+                    modifier = Modifier.size(96.dp)
+                )
+            }
 
-            // Two usage bars right below the mascot
             item { UsageBars(state = usage, onRetry = usageVm::refresh) }
 
             item {
                 Text(
-                    "Terminals",
+                    text = "Terminals",
                     style = MaterialTheme.typography.caption1,
                     color = ClaudePalette.Sand,
                     modifier = Modifier.padding(top = 6.dp),
@@ -113,7 +128,9 @@ fun HomeScreen(
     }
 }
 
-/** A terminal entry: tap the chip to open it, tap the gear to edit name/session. */
+/**
+ * A single row in the terminal list, showing the terminal name and an edit button.
+ */
 @Composable
 private fun TerminalRow(
     profile: TerminalProfile,

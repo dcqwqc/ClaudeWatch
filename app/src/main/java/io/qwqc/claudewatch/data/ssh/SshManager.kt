@@ -94,39 +94,56 @@ class SshManager(private val settingsStore: SettingsStore) {
     suspend fun test(settings: Settings): ExecResult =
         exec(settings, "echo claude-watch-ok", timeoutMs = 12_000)
 
-    /** Run a command against explicit [settings]; returns exit code + output. */
+    /**
+     * Runs a one-shot command against the server and returns the result.
+     *
+     * This function is designed for short-lived commands. It opens an 'exec' channel,
+     * reads the output until the channel closes or a timeout is reached, and then
+     * disconnects the channel. The underlying SSH session is cached and reused.
+     *
+     * @param settings The SSH connection settings to use.
+     * @param command The shell command to execute on the remote server.
+     * @param timeoutMs The maximum time to wait for the command to complete.
+     * @return [ExecResult] containing the exit code, stdout, and stderr.
+     * @throws IOException if the command times out.
+     * @throws com.jcraft.jsch.JSchException if there is an SSH-level error.
+     */
     suspend fun exec(settings: Settings, command: String, timeoutMs: Int = 20_000): ExecResult =
         withContext(Dispatchers.IO) {
             val session = getSession(settings, connectTimeoutMs = 12_000)
             try {
-                val channel = session.openChannel("exec") as ChannelExec
-                channel.setCommand(command)
-                val stderr = ByteArrayOutputStream()
-                channel.setErrStream(stderr)
-                val input = channel.inputStream
-                val stdout = ByteArrayOutputStream()
-                channel.connect()
+                (session.openChannel("exec") as ChannelExec).use { channel ->
+                    channel.setCommand(command)
+                    val stderr = ByteArrayOutputStream()
+                    channel.setErrStream(stderr)
 
-                val buf = ByteArray(8192)
-                val deadline = System.currentTimeMillis() + timeoutMs
-                while (true) {
-                    while (input.available() > 0) {
-                        val n = input.read(buf)
-                        if (n < 0) break
-                        stdout.write(buf, 0, n)
+                    channel.inputStream.use { input ->
+                        val stdout = ByteArrayOutputStream()
+                        channel.connect()
+
+                        val buf = ByteArray(8192)
+                        val deadline = System.currentTimeMillis() + timeoutMs
+                        while (true) {
+                            while (input.available() > 0) {
+                                val n = input.read(buf)
+                                if (n < 0) break
+                                stdout.write(buf, 0, n)
+                            }
+                            if (channel.isClosed) {
+                                if (input.available() > 0) continue
+                                return@use ExecResult(
+                                    channel.exitStatus,
+                                    stdout.toString("UTF-8"),
+                                    stderr.toString("UTF-8")
+                                )
+                            }
+                            if (System.currentTimeMillis() > deadline) {
+                                throw IOException("SSH exec timed out after ${timeoutMs}ms")
+                            }
+                            Thread.sleep(20)
+                        }
                     }
-                    if (channel.isClosed) {
-                        if (input.available() > 0) continue
-                        break
-                    }
-                    if (System.currentTimeMillis() > deadline) {
-                        throw IOException("SSH exec timed out after ${timeoutMs}ms")
-                    }
-                    if (input.available() == 0) Thread.sleep(20)
                 }
-                val code = channel.exitStatus
-                channel.disconnect()
-                ExecResult(code, stdout.toString("UTF-8"), stderr.toString("UTF-8"))
             } catch (e: Exception) {
                 // If the session died, clear it so the next attempt starts fresh
                 synchronized(sessionLock) { if (cachedSession === session) cachedSession = null }

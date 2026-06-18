@@ -7,12 +7,16 @@ import androidx.compose.ui.platform.LocalContext
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 
-/** Kept for source compatibility; the animated GIF ignores mood. */
-enum class MascotMood { Idle, Thinking, Done }
-
 /**
- * The Clawd mascot — an animated pixel-art GIF, loaded from a URL by Coil.
- * It is cached for offline use.
+ * A composable that displays the animated "Clawd" mascot.
+ *
+ * This component loads the mascot's animated GIF from a remote URL using Coil,
+ * which automatically handles caching for offline viewing. It's designed to
+ * fit within the layout bounds provided by its parent.
+ *
+ * @param mood This parameter is kept for source compatibility and future use,
+ *             but the current animated GIF does not change based on mood.
+ * @param modifier The [Modifier] to be applied to the image.
  */
 @Composable
 fun ClaudeMascot(
@@ -28,3 +32,6 @@ fun ClaudeMascot(
         modifier = modifier,
     )
 }
+
+/** Defines the possible states for the mascot, for future use. */
+enum class MascotMood { Idle, Thinking, Done }
