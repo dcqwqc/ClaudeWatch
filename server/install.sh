@@ -380,13 +380,14 @@ _display_key_instructions() {
 
 setup_ssh_key() {
     step "Step 6: SSH Key Manager..."
-    echo "   Each device (watch, phone, etc.) connecting to this PC needs an SSH key."
-    echo "   Think of it as a lock-and-key pair:"
-    echo "     • PRIVATE key → goes on the device (keep secret)"
-    echo "     • PUBLIC key  → stays on this PC in the allowed-connections list"
+    echo "   Your watch (or any other device running ClaudeWatch) SSHes INTO this PC"
+    echo "   to access the terminal. Each device that will connect needs its own key:"
     echo ""
-    echo "   Using a SEPARATE key per device is recommended — if a device is lost,"
-    echo "   you can revoke just that key without affecting your other devices."
+    echo "     • PRIVATE key → stays on the watch / device (never share this)"
+    echo "     • PUBLIC key  → goes on THIS PC so it knows who is allowed to connect"
+    echo ""
+    echo "   Using a SEPARATE key per device is recommended — if a watch is lost or"
+    echo "   replaced, you revoke just that key here without affecting your other devices."
     echo ""
 
     if ! command_exists ssh-keygen; then
@@ -404,16 +405,16 @@ setup_ssh_key() {
         echo -e "   ${C_BOLD}Registered devices:${C_RESET}"
         _list_keys
         echo ""
-        echo "   [a] Add / generate key for a new device"
-        echo "   [d] Display / re-show a key (to set up another device)"
-        echo "   [r] Remove a key (revoke access for a device)"
+        echo "   [a] Add / generate key for a new watch or device"
+        echo "   [d] Display an existing key again (to paste into a second watch/device)"
+        echo "   [r] Revoke a key (block a lost/replaced watch from connecting)"
         echo "   [q] Done"
         read -p "   Choice: " -n 1 key_choice; echo
 
         case $key_choice in
         a)
             echo ""
-            echo "   Give this device a short label (e.g. 'Watch1', 'Watch2', 'Phone')."
+            echo "   Give this watch/device a short label (e.g. 'Watch1', 'Watch2', 'Phone')."
             read -r -p "   Device label: " label
             label="${label// /_}"   # no spaces in filename
             [ -z "$label" ] && { warn "Label cannot be empty."; continue; }
