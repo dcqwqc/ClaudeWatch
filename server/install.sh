@@ -119,9 +119,17 @@ prompt_to_install() {
     local output; output=$(eval "$install_cmd" 2>&1); local exit_code=$?
     echo "$output"
 
-    # Success path 1: exited 0
+    # Success path 1: exited 0 — try to inject into POSIX PATH on Windows in
+    # case the installer added it to the registry PATH but not this session.
     if [ $exit_code -eq 0 ]; then
         info "'$cmd_name' installed successfully."
+        resolve_command "$cmd_name" &>/dev/null  # best-effort PATH injection
+        if $IS_WINDOWS; then
+            echo ""
+            warn "PATH notice: Windows PATH changes don't apply to the current Git Bash"
+            warn "session automatically. '$cmd_name' has been injected for this session,"
+            warn "but if Step 5 fails, restart Git Bash first — it will work after that."
+        fi
         return 0
     fi
 
@@ -131,10 +139,14 @@ prompt_to_install() {
     if $IS_WINDOWS && echo "$output" | grep -qiE "already installed|No available upgrade|No newer package"; then
         if resolve_command "$cmd_name"; then
             info "'$cmd_name' is already installed and up to date."
+            echo ""
+            warn "PATH notice: '$cmd_name' was found via Windows PATH and injected"
+            warn "into this session. If Step 5 still reports it missing, restart"
+            warn "Git Bash and try Step 5 directly — it should work after that."
             return 0
         else
             warn "'$cmd_name' is installed by Windows but could not be located."
-            warn "Please restart your terminal and re-run this step."
+            warn "Restart Git Bash and try Step 5 directly — it may work after that."
             return 1
         fi
     fi
