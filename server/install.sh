@@ -161,11 +161,19 @@ setup_firebase() {
     step "Step 2: Configuring Firebase Notifications..."
     while true; do
         prompt "Open this link in your browser: ${C_CYAN}https://console.firebase.google.com/${C_RESET}"
-        echo "Instructions: 1. Create a project. 2. Go to ${C_BOLD}Project settings > Service Accounts${C_RESET}."
-        echo "              3. Click '${C_BOLD}Generate new private key${C_RESET}' and download the JSON file."
+        echo -e "Instructions: 1. Create a project. 2. Go to ${C_BOLD}Project settings > Service Accounts${C_RESET}."
+        echo -e "              3. Click '${C_BOLD}Generate new private key${C_RESET}' and download the JSON file."
         prompt "Enter the ${C_BOLD}full path${C_RESET} to the downloaded JSON file."
-        echo "   (e.g., /c/Users/YourName/Downloads/my-project-firebase.json)"
-        read -p "Path: " key_path
+        echo "   Windows: C:\\Users\\YourName\\Downloads\\my-project-firebase.json"
+        echo "   MSYS:    /c/Users/YourName/Downloads/my-project-firebase.json"
+        # -r prevents read from eating backslashes in Windows paths
+        read -r -p "Path: " key_path
+        # Strip surrounding quotes that users may copy-paste on Windows
+        key_path="${key_path#\"}"; key_path="${key_path%\"}"
+        # Convert Windows backslash path to MSYS/POSIX path
+        if $IS_WINDOWS && command_exists cygpath; then
+            key_path=$(cygpath -u "$key_path" 2>/dev/null || echo "$key_path")
+        fi
         if [ -f "$key_path" ]; then
             cp "$key_path" "$TARGET_DIR/service-account.json"
             info "Firebase service account key successfully copied."
