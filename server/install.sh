@@ -59,25 +59,80 @@ command_exists() {
     command -v "$1" &>/dev/null
 }
 
-# --- Setup Logic Functions ---
+# --- Automation & Prerequisite Functions ---
+
+# Tries to install a package after asking for user permission.
+# Usage: prompt_to_install <command_name> <package_name>
+prompt_to_install() {
+    local cmd_name="$1"
+    local pkg_name="$2"
+    
+    prompt "The required tool '${C_BOLD}$cmd_name${C_RESET}' is not installed."
+    read -p "May I attempt to install it using 'sudo'? (y/N) " -n 1 -r
+    echo
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        warn "'$cmd_name' will not be installed. Dependent features may not work."
+        return 1
+    fi
+
+    local pm_cmd=""
+    if command_exists apt; then
+        pm_cmd="sudo apt update && sudo apt install -y $pkg_name"
+    elif command_exists yum; then
+        pm_cmd="sudo yum install -y $pkg_name"
+    elif command_exists dnf; then
+        pm_cmd="sudo dnf install -y $pkg_name"
+    else
+        warn "Could not detect a supported package manager (apt, yum, dnf)."
+        return 1
+    fi
+
+    info "Running: $pm_cmd"
+    if eval "$pm_cmd"; then
+        info "'$pkg_name' installed successfully."
+        return 0
+    else
+        warn "Installation of '$pkg_name' failed. Please try installing it manually."
+        return 1
+    fi
+}
 
 check_prerequisites() {
     step "Step 0: Checking Prerequisites..."
     local all_ok=true
-    for cmd in git python3 pip npm jq; do
+    
+    # Define dependencies: command_to_check, package_to_install
+    local deps=(
+        "git:git"
+        "python3:python3"
+        "pip:python3-pip"
+        "npm:npm"
+        "jq:jq"
+    )
+
+    for dep in "${deps[@]}"; do
+        IFS=":" read -r cmd pkg <<< "$dep"
         if ! command_exists "$cmd"; then
-            warn "Command not found: '$cmd'. This is required."
-            all_ok=false
+            if prompt_to_install "$cmd" "$pkg"; then
+                info "$cmd is now installed."
+            else
+                all_ok=false
+            fi
+        else
+            info "$cmd is already installed."
         fi
     done
 
     if [ "$all_ok" = false ]; then
-        prompt "Please install the missing tools listed above, then re-run this utility."
+        warn "Some prerequisites are still missing. Not all features may work."
     else
         info "All prerequisite tools are installed."
     fi
     pause
 }
+
+
+# --- Main Setup Functions ---
 
 download_scripts() {
     step "Step 1: Downloading Server Scripts..."
@@ -141,25 +196,29 @@ setup_firebase() {
 
 install_dependencies() {
     step "Step 3: Installing Dependencies..."
-    info "Installing Python libraries ('google-auth', 'requests')..."
-    pip install --user --quiet --disable-pip-version-check google-auth requests
-    info "Python libraries installed."
+    if ! command_exists pip; then warn "pip not found, skipping Python libraries."; else
+        info "Installing Python libraries ('google-auth', 'requests')..."
+        pip install --user --quiet --disable-pip-version-check google-auth requests
+        info "Python libraries installed."
+    fi
 
-    if ! command_exists ccusage; then
-        prompt "The 'ccusage' Node.js package is required for usage stats."
-        read -p "Install it globally via npm? (y/N) " -n 1 -r
-        echo
-        if [[ $REPLY =~ ^[Yy]$ ]]; then
-            info "Installing 'ccusage' globally. This may take a moment..."
-            npm install -g ccusage
-            info "'ccusage' installed."
-            touch "$STATE_DEPS_OK"
+    if ! command_exists npm; then warn "npm not found, skipping ccusage."; else
+        if ! command_exists ccusage; then
+            prompt "The 'ccusage' Node.js package is required for usage stats."
+            read -p "Install it globally via npm? (y/N) " -n 1 -r
+            echo
+            if [[ $REPLY =~ ^[Yy]$ ]]; then
+                info "Installing 'ccusage' globally. This may take a moment..."
+                npm install -g ccusage
+                info "'ccusage' installed."
+                touch "$STATE_DEPS_OK"
+            else
+                warn "'ccusage' not installed. Usage stats will not function."
+            fi
         else
-            warn "'ccusage' not installed. Usage stats will not function."
+            info "'ccusage' is already installed."
+            touch "$STATE_DEPS_OK"
         fi
-    else
-        info "'ccusage' is already installed."
-        touch "$STATE_DEPS_OK"
     fi
     pause
 }
@@ -196,11 +255,10 @@ setup_path() {
 
 setup_hooks() {
     step "Step 5: Configuring Claude Code Hook..."
+    if ! command_exists jq; then warn "jq not found, cannot generate hook JSON automatically."; pause; return; fi
     chmod +x "$TARGET_DIR/claude-done-hook.sh"
     
-    # Replace placeholder with actual home directory path
     local real_hook_path="$TARGET_DIR/claude-done-hook.sh"
-
     local hook_json
     hook_json=$(jq -n --arg cmd "$real_hook_path" '{hooks: {Stop: [{hooks: [{type: "command", command: $cmd}]}]}}')
 
@@ -220,6 +278,8 @@ ${C_GREEN}${hook_json}${C_RESET}
 
 # --- Main Menu ---
 while true; do
+    # Ensure target directory exists for state files
+    mkdir -p "$TARGET_DIR"
     header
     echo "Select a step to run. Completed steps are marked with ✓."
     
@@ -230,7 +290,7 @@ while true; do
     [[ -f "$STATE_HOOK_OK" ]] && s5="✓" || s5=" "
 
     echo -e "
-  [0] Check Prerequisites"
+  [0] Check/Install Prerequisites"
     echo "  [1] Download/Update Server Scripts"
     echo -e "  [2] Configure Firebase Notifications  [$s2]"
     echo -e "  [3] Install Dependencies (Python/npm) [$s3]"
