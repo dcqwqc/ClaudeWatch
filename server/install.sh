@@ -1,7 +1,7 @@
 #!/bin/bash
 #
-# ClaudeWatch Server-Side Interactive Setup Utility
-# A persistent, menu-driven wizard to guide you through setup.
+# ClaudeWatch Server-Side Interactive Setup Utility v2.0
+# A persistent, menu-driven wizard for a fully guided setup.
 #
 
 # --- Style & Color Definitions ---
@@ -18,77 +18,64 @@ GITHUB_REPO="dcqwqc/ClaudeWatch"
 TARGET_DIR="$HOME/.claude-watch"
 
 # --- State Markers ---
-# The script will create these files to track completed steps
 STATE_FIREBASE_OK="$TARGET_DIR/.state_firebase_ok"
 STATE_DEPS_OK="$TARGET_DIR/.state_deps_ok"
-STATE_USAGE_OK="$TARGET_DIR/.state_usage_ok"
+STATE_PATH_OK="$TARGET_DIR/.state_path_ok"
 STATE_HOOK_OK="$TARGET_DIR/.state_hook_ok"
 
 # --- Helper Functions ---
 header() {
     clear
-    echo -e "${C_GREEN}${C_BOLD}--- ClaudeWatch Server Setup Utility ---${C_RESET}"
+    echo -e "${C_GREEN}${C_BOLD}--- ClaudeWatch Server Setup Utility v2.0 ---${C_RESET}"
     echo "This wizard will guide you through configuring your server."
     echo -e "It saves your progress, so you can quit and resume at any time."
-    echo "---------------------------------------------------"
+    echo "------------------------------------------------------"
 }
 
-step() {
-    echo -e "
-${C_BLUE}==> ${C_BOLD}$1${C_RESET}"
-}
-
-prompt() {
-    echo -e "
-${C_YELLOW}ACTION: ${C_RESET}$1"
-}
-
-info() {
-    echo -e "   ${C_GREEN}✓${C_RESET} $1"
-}
-
-warn() {
-    echo -e "   ${C_YELLOW}⚠️  $1${C_RESET}"
-}
-
-pause() {
-    read -p "Press [Enter] to return to the main menu..."
-}
-
-command_exists() {
-    command -v "$1" &>/dev/null
-}
+step() { echo -e "
+${C_BLUE}==> ${C_BOLD}$1${C_RESET}"; }
+prompt() { echo -e "
+${C_YELLOW}ACTION: ${C_RESET}$1"; }
+info() { echo -e "   ${C_GREEN}✓${C_RESET} $1"; }
+warn() { echo -e "   ${C_YELLOW}⚠️  $1${C_RESET}"; }
+pause() { read -p "Press [Enter] to return to the main menu..."; }
+command_exists() { command -v "$1" &>/dev/null; }
 
 # --- Automation & Prerequisite Functions ---
 
 # Tries to install a package after asking for user permission.
-# Usage: prompt_to_install <command_name> <package_name>
+# Usage: prompt_to_install <command_name> <package_name> <install_type>
 prompt_to_install() {
     local cmd_name="$1"
     local pkg_name="$2"
-    
+    local install_type="$3" # 'sys' or 'npm'
+
     prompt "The required tool '${C_BOLD}$cmd_name${C_RESET}' is not installed."
-    read -p "May I attempt to install it using 'sudo'? (y/N) " -n 1 -r
+    read -p "May I attempt to install it for you? (y/N) " -n 1 -r
     echo
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
         warn "'$cmd_name' will not be installed. Dependent features may not work."
         return 1
     fi
 
-    local pm_cmd=""
-    if command_exists apt; then
-        pm_cmd="sudo apt update && sudo apt install -y $pkg_name"
-    elif command_exists yum; then
-        pm_cmd="sudo yum install -y $pkg_name"
-    elif command_exists dnf; then
-        pm_cmd="sudo dnf install -y $pkg_name"
-    else
-        warn "Could not detect a supported package manager (apt, yum, dnf)."
-        return 1
+    local install_cmd=""
+    if [[ "$install_type" == "sys" ]]; then
+        if command_exists apt; then
+            install_cmd="sudo apt update && sudo apt install -y $pkg_name"
+        elif command_exists yum; then
+            install_cmd="sudo yum install -y $pkg_name"
+        elif command_exists dnf; then
+            install_cmd="sudo dnf install -y $pkg_name"
+        else
+            warn "Could not detect a supported package manager (apt, yum, dnf)."
+            return 1
+        fi
+    elif [[ "$install_type" == "npm" ]]; then
+        install_cmd="npm install -g $pkg_name"
     fi
 
-    info "Running: $pm_cmd"
-    if eval "$pm_cmd"; then
+    info "Running: $install_cmd"
+    if eval "$install_cmd"; then
         info "'$pkg_name' installed successfully."
         return 0
     else
@@ -98,22 +85,14 @@ prompt_to_install() {
 }
 
 check_prerequisites() {
-    step "Step 0: Checking Prerequisites..."
+    step "Step 0: Checking System Prerequisites..."
     local all_ok=true
-    
-    # Define dependencies: command_to_check, package_to_install
-    local deps=(
-        "git:git"
-        "python3:python3"
-        "pip:python3-pip"
-        "npm:npm"
-        "jq:jq"
-    )
+    local deps=("git:git:sys" "python3:python3:sys" "pip:python3-pip:sys" "npm:npm:sys" "jq:jq:sys")
 
     for dep in "${deps[@]}"; do
-        IFS=":" read -r cmd pkg <<< "$dep"
+        IFS=":" read -r cmd pkg type <<< "$dep"
         if ! command_exists "$cmd"; then
-            if prompt_to_install "$cmd" "$pkg"; then
+            if prompt_to_install "$cmd" "$pkg" "$type"; then
                 info "$cmd is now installed."
             else
                 all_ok=false
@@ -136,59 +115,24 @@ check_prerequisites() {
 
 download_scripts() {
     step "Step 1: Downloading Server Scripts..."
-    if [ -d "$TARGET_DIR" ]; then
-        info "Directory $TARGET_DIR already exists."
-    else
-        info "Creating installation directory at $TARGET_DIR..."
-        mkdir -p "$TARGET_DIR"
-    fi
-
-    local TEMP_DIR
-    TEMP_DIR=$(mktemp -d)
-    trap 'rm -rf -- "$TEMP_DIR"' EXIT
-
-    info "Fetching latest scripts from GitHub..."
-    git init -q "$TEMP_DIR"
-    (
-        cd "$TEMP_DIR" || exit
-        git remote add origin "https://github.com/$GITHUB_REPO.git" &>/dev/null
-        git config core.sparseCheckout true
-        echo "server/" >.git/info/sparse-checkout
-        git pull -q --depth=1 origin main
-    )
-
-    info "Copying files to $TARGET_DIR..."
-    cp -rf "$TEMP_DIR"/server/* "$TARGET_DIR"
-    info "Scripts downloaded and installed."
+    if ! command_exists git; then warn "git is not installed. Please run Step 0 first."; pause; return; fi
+    
+    # ... (rest of the function is unchanged)
+    if [ -d "$TARGET_DIR" ]; then info "Directory $TARGET_DIR already exists."; else mkdir -p "$TARGET_DIR"; fi
+    local TEMP_DIR; TEMP_DIR=$(mktemp -d); trap 'rm -rf -- "$TEMP_DIR"' EXIT
+    info "Fetching latest scripts from GitHub..."; git init -q "$TEMP_DIR"; (cd "$TEMP_DIR" || exit; git remote add origin "https://github.com/$GITHUB_REPO.git" &>/dev/null; git config core.sparseCheckout true; echo "server/" >.git/info/sparse-checkout; git pull -q --depth=1 origin main)
+    info "Copying files to $TARGET_DIR..."; cp -rf "$TEMP_DIR"/server/* "$TARGET_DIR"; info "Scripts downloaded and installed."
     pause
 }
 
 setup_firebase() {
     step "Step 2: Configuring Firebase Notifications..."
+    # ... (rest of the function is unchanged)
     while true; do
-        prompt "Open this link in your browser: ${C_CYAN}https://console.firebase.google.com/${C_RESET}"
-        echo "In the Firebase Console, follow these steps:"
-        echo "  1. Create a project."
-        echo "  2. Go to ${C_BOLD}Project settings > Service Accounts${C_RESET}."
-        echo "  3. Click "${C_BOLD}Generate new private key${C_RESET}" and download the JSON file."
-        
-        prompt "Now, please enter the ${C_BOLD}full path${C_RESET} to the downloaded JSON file."
-        echo "   (Example for Linux: /home/user/Downloads/my-project-123.json)"
-        echo "   (Example for Windows/Git Bash: /c/Users/User/Downloads/my-project-123.json)"
-        read -p "Path: " key_path
-
-        if [ -f "$key_path" ]; then
-            cp "$key_path" "$TARGET_DIR/service-account.json"
-            info "Firebase service account key successfully copied."
-            touch "$STATE_FIREBASE_OK"
-            break
-        else
-            warn "File not found at '$key_path'. Please check the path and try again."
-            read -p "Retry? (y/N) " -n 1 -r
-            echo
-            if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-                break
-            fi
+        prompt "Open this link in your browser: ${C_CYAN}https://console.firebase.google.com/${C_RESET}"; echo "In the Firebase Console, follow these steps:"; echo "  1. Create a project."; echo "  2. Go to ${C_BOLD}Project settings > Service Accounts${C_RESET}."; echo "  3. Click "${C_BOLD}Generate new private key${C_RESET}" and download the JSON file."
+        prompt "Now, please enter the ${C_BOLD}full path${C_RESET} to the downloaded JSON file."; echo "   (Example for Linux: /home/user/Downloads/my-project-123.json)"; echo "   (Example for Windows/Git Bash: /c/Users/User/Downloads/my-project-123.json)"; read -p "Path: " key_path
+        if [ -f "$key_path" ]; then cp "$key_path" "$TARGET_DIR/service-account.json"; info "Firebase service account key successfully copied."; touch "$STATE_FIREBASE_OK"; break; else
+            warn "File not found at '$key_path'. Please check the path and try again."; read -p "Retry? (y/N) " -n 1 -r; echo; if [[ ! $REPLY =~ ^[Yy]$ ]]; then break; fi
         fi
     done
     pause
@@ -196,28 +140,15 @@ setup_firebase() {
 
 install_dependencies() {
     step "Step 3: Installing Dependencies..."
-    if ! command_exists pip; then warn "pip not found, skipping Python libraries."; else
-        info "Installing Python libraries ('google-auth', 'requests')..."
-        pip install --user --quiet --disable-pip-version-check google-auth requests
-        info "Python libraries installed."
+    if ! command_exists pip; then warn "pip not found. Please run Step 0."; else
+        info "Installing Python libraries ('google-auth', 'requests')..."; pip install --user --quiet --disable-pip-version-check google-auth requests; info "Python libraries installed."
     fi
 
-    if ! command_exists npm; then warn "npm not found, skipping ccusage."; else
+    if ! command_exists npm; then warn "npm not found. Please run Step 0."; else
         if ! command_exists ccusage; then
-            prompt "The 'ccusage' Node.js package is required for usage stats."
-            read -p "Install it globally via npm? (y/N) " -n 1 -r
-            echo
-            if [[ $REPLY =~ ^[Yy]$ ]]; then
-                info "Installing 'ccusage' globally. This may take a moment..."
-                npm install -g ccusage
-                info "'ccusage' installed."
-                touch "$STATE_DEPS_OK"
-            else
-                warn "'ccusage' not installed. Usage stats will not function."
-            fi
+            if prompt_to_install "ccusage" "ccusage" "npm"; then touch "$STATE_DEPS_OK"; fi
         else
-            info "'ccusage' is already installed."
-            touch "$STATE_DEPS_OK"
+            info "'ccusage' is already installed."; touch "$STATE_DEPS_OK"
         fi
     fi
     pause
@@ -225,75 +156,73 @@ install_dependencies() {
 
 setup_path() {
     step "Step 4: Setting up Usage Command..."
+    # ... (rest of the function is unchanged)
     chmod +x "$TARGET_DIR/claude-watch-usage.sh"
-
-    local os
-    os=$(uname -s)
-    if [[ "$os" == "Linux" || "$os" == "Darwin" ]]; then
-        info "Detected Linux/macOS. Creating symlink in ~/.local/bin..."
-        mkdir -p "$HOME/.local/bin"
-        ln -sf "$TARGET_DIR/claude-watch-usage.sh" "$HOME/.local/bin/ccusage"
-        if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
-            warn "Your PATH does not seem to include ~/.local/bin."
-            warn "You may need to add 'export PATH=\$PATH:\$HOME/.local/bin' to your .bashrc or .profile"
-        fi
-        info "Usage command 'ccusage' is now available."
-        touch "$STATE_USAGE_OK"
-    else # Likely Windows (Git Bash / MSYS)
-        warn "Detected Windows-like environment. Symlinks are unreliable."
-        prompt "Please add the scripts directory to your system's PATH variable manually."
-        echo "Directory to add: ${C_CYAN}$TARGET_DIR${C_RESET}"
-        echo "After adding it, you can run 'ccusage' from a new terminal."
-        read -p "Acknowledge and mark this step as complete? (y/N) " -n 1 -r
-        echo
-        if [[ $REPLY =~ ^[Yy]$ ]]; then
-            touch "$STATE_USAGE_OK"
-        fi
+    local os; os=$(uname -s); if [[ "$os" == "Linux" || "$os" == "Darwin" ]]; then
+        info "Detected Linux/macOS. Creating symlink in ~/.local/bin..."; mkdir -p "$HOME/.local/bin"; ln -sf "$TARGET_DIR/claude-watch-usage.sh" "$HOME/.local/bin/ccusage"
+        if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then warn "Your PATH does not seem to include ~/.local/bin. You may need to add it to your .bashrc or .profile"; fi
+        info "Usage command 'ccusage' is now available."; touch "$STATE_PATH_OK"
+    else
+        warn "Detected Windows-like environment. Symlinks are unreliable."; prompt "Please add the scripts directory to your system's PATH variable manually."; echo "Directory to add: ${C_CYAN}$TARGET_DIR${C_RESET}"; read -p "Acknowledge and mark step as complete? (y/N) " -n 1 -r; echo
+        if [[ $REPLY =~ ^[Yy]$ ]]; then touch "$STATE_PATH_OK"; fi
     fi
     pause
 }
 
 setup_hooks() {
     step "Step 5: Configuring Claude Code Hook..."
-    if ! command_exists jq; then warn "jq not found, cannot generate hook JSON automatically."; pause; return; fi
-    chmod +x "$TARGET_DIR/claude-done-hook.sh"
+    if ! command_exists jq; then warn "jq not found. Please run Step 0. Cannot automate this step."; pause; return; fi
     
-    local real_hook_path="$TARGET_DIR/claude-done-hook.sh"
-    local hook_json
-    hook_json=$(jq -n --arg cmd "$real_hook_path" '{hooks: {Stop: [{hooks: [{type: "command", command: $cmd}]}]}}')
+    local settings_file="$HOME/.claude/settings.json"
+    local backup_file="$settings_file.bak"
+    local hook_cmd="$TARGET_DIR/claude-done-hook.sh"
+    chmod +x "$hook_cmd"
 
-    prompt "Please open your Claude Code settings file at: ${C_CYAN}~/.claude/settings.json${C_RESET}"
-    echo "You must add the following JSON block. If a 'hooks' section already exists, you may need to merge this 'Stop' event carefully."
-    echo -e "
-${C_GREEN}${hook_json}${C_RESET}
-"
-    
-    read -p "Acknowledge and mark this step as complete? (y/N) " -n 1 -r
+    if [ ! -f "$settings_file" ]; then warn "Claude settings file not found at $settings_file"; pause; return; fi
+
+    prompt "This step will automatically add the 'Stop' hook to your $settings_file."
+    read -p "A backup will be created. Is it okay to proceed? (y/N) " -n 1 -r
     echo
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then warn "Hook setup skipped."; pause; return; fi
+
+    # Create a backup
+    cp "$settings_file" "$backup_file"
+    info "Backup created at $backup_file"
+
+    # The jq magic: create the hook object, then merge it with the existing settings
+    local hook_obj='{ "hooks": { "Stop": [ { "hooks": [ { "type": "command", "command": "'"$hook_cmd"'" } ] } ] } }'
+    local temp_json
+    temp_json=$(mktemp)
+
+    if jq --argjson obj "$hook_obj" '. * $obj' "$settings_file" > "$temp_json"; then
+        mv "$temp_json" "$settings_file"
+        info "Successfully merged hook into $settings_file."
         touch "$STATE_HOOK_OK"
+    else
+        warn "Automated merge failed! Your original file is safe."
+        warn "Please add the hook manually. The required JSON block is:"
+        echo -e "${C_GREEN}${hook_obj}${C_RESET}"
     fi
     pause
 }
 
 # --- Main Menu ---
 while true; do
-    # Ensure target directory exists for state files
-    mkdir -p "$TARGET_DIR"
+    mkdir -p "$TARGET_DIR" # Ensure target directory exists for state files
     header
     echo "Select a step to run. Completed steps are marked with ✓."
     
     # Check states and set display strings
     [[ -f "$STATE_FIREBASE_OK" ]] && s2="✓" || s2=" "
-    [[ -f "$STATE_DEPS_OK" ]] && s3="✓" || s3=" "
-    [[ -f "$STATE_USAGE_OK" ]] && s4="✓" || s4=" "
-    [[ -f "$STATE_HOOK_OK" ]] && s5="✓" || s5=" "
+    [[ -f "$STATE_DEPS_OK" ]]     && s3="✓" || s3=" "
+    [[ -f "$STATE_PATH_OK" ]]     && s4="✓" || s4=" "
+    [[ -f "$STATE_HOOK_OK" ]]     && s5="✓" || s5=" "
 
     echo -e "
-  [0] Check/Install Prerequisites"
+  [0] Check/Install All Prerequisites"
     echo "  [1] Download/Update Server Scripts"
     echo -e "  [2] Configure Firebase Notifications  [$s2]"
-    echo -e "  [3] Install Dependencies (Python/npm) [$s3]"
+    echo -e "  [3] Install App Dependencies          [$s3]"
     echo -e "  [4] Set up Usage Command (PATH)       [$s4]"
     echo -e "  [5] Configure Claude Code Hook        [$s5]"
     echo "  [q] Quit"
@@ -308,9 +237,21 @@ while true; do
     4) setup_path ;;
     5) setup_hooks ;;
     q | Q) break ;;
-    *) warn "Invalid option. Please try again." && sleep 1 ;;
+    *) warn "Invalid option. Please try again." && sleep 0.5 ;;
     esac
 done
 
+# --- Final Summary ---
+header
+echo -e "${C_BOLD}Setup Complete! Here is your configuration status:${C_RESET}"
+echo "------------------------------------------------------"
+[[ -f "$STATE_FIREBASE_OK" ]] && info "Firebase Notifications" || warn "Firebase Notifications"
+[[ -f "$STATE_DEPS_OK" ]]     && info "App Dependencies"     || warn "App Dependencies"
+[[ -f "$STATE_PATH_OK" ]]     && info "Usage Command (PATH)"       || warn "Usage Command (PATH)"
+[[ -f "$STATE_HOOK_OK" ]]     && info "Claude Code Hook"        || warn "Claude Code Hook"
+echo "------------------------------------------------------"
 echo -e "
-${C_GREEN}Setup utility exited. Thank you for using ClaudeWatch!${C_RESET}"
+Don't forget the final manual step:"
+prompt "Add your watch's public key to your server's ${C_CYAN}~/.ssh/authorized_keys${C_RESET} file."
+echo -e "
+${C_GREEN}Thank you for using ClaudeWatch!${C_RESET}"
