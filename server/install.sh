@@ -325,87 +325,130 @@ setup_hooks() {
     pause
 }
 
-_add_pub_to_authorized_keys() {
-    local pub_file="$1"
-    mkdir -p "$HOME/.ssh"; chmod 700 "$HOME/.ssh"
-    touch "$HOME/.ssh/authorized_keys"; chmod 600 "$HOME/.ssh/authorized_keys"
-    local pub_key; pub_key=$(cat "$pub_file")
-    if ! grep -qF "$pub_key" "$HOME/.ssh/authorized_keys" 2>/dev/null; then
-        echo "$pub_key" >> "$HOME/.ssh/authorized_keys"
-        info "Public key added to ~/.ssh/authorized_keys"
-    else
-        info "Public key was already in ~/.ssh/authorized_keys"
-    fi
+# Marker comment so we can list/revoke only the keys this installer added.
+CW_TAG="claude-watch-managed"
+
+_list_watch_keys() {
+    if [ ! -f "$HOME/.ssh/authorized_keys" ]; then echo "     (none yet)"; return; fi
+    local found=false n=0
+    while IFS= read -r line; do
+        case "$line" in
+            *"$CW_TAG"*)
+                n=$((n+1))
+                # Pull the trailing "comment" (the label the user typed) for display
+                local label; label=$(echo "$line" | sed -n "s/.*${CW_TAG}:\\([^ ]*\\).*/\\1/p")
+                [ -z "$label" ] && label="(unnamed)"
+                local fp; fp=$(echo "$line" | awk '{print $2}' | cut -c1-16)
+                echo "     [$n] $label   …${fp}"
+                found=true
+                ;;
+        esac
+    done < "$HOME/.ssh/authorized_keys"
+    $found || echo "     (none yet)"
 }
 
 setup_ssh_key() {
-    step "Step 6: Watch SSH Key Setup..."
-    echo "   Your watch is the SSH client — it connects INTO this PC (and any other"
-    echo "   machines you set up). The watch has ONE key pair:"
+    step "Step 6: Register a Watch Key (authorize this machine)..."
+    echo "   Your WATCH generates the SSH keys (Watch app → Generate Key). The watch"
+    echo "   keeps the private key and shows you the PUBLIC key as text / a QR code."
     echo ""
-    echo "     • PRIVATE key → stays on the watch (paste into the ClaudeWatch app)"
-    echo "     • PUBLIC key  → goes on every PC/server the watch needs to connect to"
-    echo ""
-    echo "   This step generates the key and adds it to THIS PC. For other machines"
-    echo "   (laptop, home server, etc.) you copy the same public key to each of them."
+    echo "   This step just registers that public key on THIS machine so the watch is"
+    echo "   allowed to connect in. Do this once per machine (PC, server, laptop …),"
+    echo "   each with its own key generated on the watch."
     echo ""
 
-    if ! command_exists ssh-keygen; then
-        warn "ssh-keygen not found. Please install OpenSSH:"
-        $IS_WINDOWS && warn "  PowerShell (Admin): Add-WindowsCapability -Online -Name OpenSSH.Client~~~~0.0.1.0" \
-                     || warn "  sudo apt install openssh-client"
+    while true; do
+        echo ""
+        echo -e "   ${C_BOLD}Authorized watch keys on this machine:${C_RESET}"
+        _list_watch_keys
+        echo ""
+        echo "   [a] Add a key (paste the public key your watch shows)"
+        echo "   [r] Revoke a key (stop a watch connection from working here)"
+        echo "   [q] Done"
+        read -p "   Choice: " -n 1 key_choice; echo
+
+        case $key_choice in
+        a) _add_watch_key ;;
+        r) _revoke_watch_key ;;
+        q|Q) break ;;
+        *) warn "Invalid option." ;;
+        esac
+    done
+}
+
+_add_watch_key() {
+    echo ""
+    echo "   On the watch: open the ClaudeWatch app → Settings → Generate Key."
+    echo "   It shows a PUBLIC key line that starts with 'ssh-ed25519' or 'ssh-rsa'."
+    echo "   Read it off the QR (scan with your phone) or type it, and paste it here."
+    echo ""
+    echo "   Give this connection a name first (e.g. 'PC', 'Server', 'Laptop')."
+    read -r -p "   Connection name: " label
+    label="${label// /_}"
+    [ -z "$label" ] && label="watch"
+
+    echo "   Now paste the public key line and press Enter:"
+    read -r pub_key
+    # Strip surrounding quotes if pasted
+    pub_key="${pub_key#\"}"; pub_key="${pub_key%\"}"
+    pub_key="$(echo "$pub_key" | tr -d '\r' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
+
+    if ! echo "$pub_key" | grep -qE '^(ssh-ed25519|ssh-rsa|ecdsa-sha2-) '; then
+        warn "That does not look like an SSH public key (must start with ssh-ed25519 / ssh-rsa)."
+        warn "Not added. Make sure you copied the PUBLIC key, not the private one."
         pause; return
     fi
 
-    local key_file="$TARGET_DIR/watch_key"
+    mkdir -p "$HOME/.ssh"; chmod 700 "$HOME/.ssh"
+    touch "$HOME/.ssh/authorized_keys"; chmod 600 "$HOME/.ssh/authorized_keys"
 
-    echo "   [g] Generate a new key for the watch"
-    echo "   [s] Show existing key  (re-display to copy into app or add to another machine)"
-    echo "   [q] Done"
-    read -p "   Choice: " -n 1 key_choice; echo
+    # Take the key type + base64 body (first two fields) as the identity for dedupe.
+    local key_body; key_body=$(echo "$pub_key" | awk '{print $1" "$2}')
+    if grep -qF "$key_body" "$HOME/.ssh/authorized_keys" 2>/dev/null; then
+        info "That key is already authorized on this machine."
+        pause; return
+    fi
 
-    case $key_choice in
-    g)
-        if [ -f "$key_file" ]; then
-            warn "A watch key already exists."
-            read -p "   Overwrite it? The old key will stop working everywhere. (y/N) " -n 1 -r; echo
-            [[ ! $REPLY =~ ^[Yy]$ ]] && { pause; return; }
-            rm -f "$key_file" "${key_file}.pub"
-        fi
-        info "Generating watch SSH key (ed25519)..."
-        ssh-keygen -t ed25519 -f "$key_file" -N "" -C "ClaudeWatch-Watch" -q
-        chmod 600 "$key_file"
-        _add_pub_to_authorized_keys "${key_file}.pub"
-        _display_key_instructions "$key_file"
-        touch "$STATE_SSH_OK"
-        ;;
-    s)
-        if [ ! -f "$key_file" ]; then
-            warn "No watch key found yet. Choose [g] to generate one first."
-        else
-            _display_key_instructions "$key_file"
-        fi
-        ;;
-    q|Q) return ;;
-    *) warn "Invalid option." ;;
-    esac
+    # Tag the line so we can list/revoke it later, embedding the user's label.
+    echo "$key_body ${CW_TAG}:${label}" >> "$HOME/.ssh/authorized_keys"
+    info "Key '$label' authorized. Your watch can now connect to this machine."
+    touch "$STATE_SSH_OK"
     pause
 }
 
-_display_key_instructions() {
-    local key_file="$1"
+_revoke_watch_key() {
     echo ""
-    echo -e "   ${C_BOLD}── PRIVATE KEY (paste this into the ClaudeWatch app on your watch) ──${C_RESET}"
-    echo "   App → Settings → SSH Private Key — paste everything including the dashes"
+    echo "   Authorized watch keys:"
+    _list_watch_keys
     echo ""
-    echo -e "${C_YELLOW}"
-    cat "$key_file"
-    echo -e "${C_RESET}"
-    echo -e "   ${C_BOLD}── PUBLIC KEY (add this to every machine the watch should connect to) ──${C_RESET}"
-    echo "   On each additional PC/server, run:"
-    echo -e "   ${C_CYAN}echo '$(cat "${key_file}.pub")' >> ~/.ssh/authorized_keys${C_RESET}"
-    echo ""
-    echo "   Public key file on this PC: ${key_file}.pub"
+    read -r -p "   Enter the NUMBER of the key to revoke (or blank to cancel): " num
+    [ -z "$num" ] && return
+    [[ ! "$num" =~ ^[0-9]+$ ]] && { warn "Not a number."; pause; return; }
+
+    # Find the Nth managed line and delete it.
+    local tmp; tmp=$(mktemp); local n=0; local removed=""
+    while IFS= read -r line; do
+        case "$line" in
+            *"$CW_TAG"*)
+                n=$((n+1))
+                if [ "$n" -eq "$num" ]; then
+                    removed=$(echo "$line" | sed -n "s/.*${CW_TAG}:\\([^ ]*\\).*/\\1/p")
+                    continue   # skip = delete
+                fi
+                ;;
+        esac
+        echo "$line" >> "$tmp"
+    done < "$HOME/.ssh/authorized_keys"
+    mv "$tmp" "$HOME/.ssh/authorized_keys"; chmod 600 "$HOME/.ssh/authorized_keys"
+
+    if [ -n "$removed" ]; then
+        info "Revoked '$removed'. That watch connection no longer works on this machine."
+    else
+        warn "No key with that number was found."
+    fi
+    # If no managed keys remain, clear the completion marker.
+    grep -q "$CW_TAG" "$HOME/.ssh/authorized_keys" 2>/dev/null || rm -f "$STATE_SSH_OK"
+    pause
 }
 
 # Connection setup helpers write results into these globals
@@ -568,32 +611,25 @@ setup_connection() {
     read -r -p "   SSH username on this PC (Enter for '$ssh_user'): " input_user
     [ -n "$input_user" ] && ssh_user="$input_user"
 
-    # The watch has one key; reference it directly
-    local ssh_key_path="$TARGET_DIR/watch_key"
-    if [ ! -f "$ssh_key_path" ]; then
-        warn "No watch key found at $ssh_key_path — run Step 6 first to generate one."
-    else
-        info "Using watch key: $ssh_key_path"
-    fi
-
-    # Write config
+    # Save a record for reference. The private key lives on the WATCH (generated
+    # there), so there is no key path on the PC side — the watch already has it.
     local config_file="$TARGET_DIR/connection.conf"
     cat > "$config_file" <<EOF
 # ClaudeWatch Connection Configuration — generated $(date)
+# These are the values to type into the watch app's connection settings.
 PRIMARY_HOST=$primary_host
 PRIMARY_PORT=$primary_port
 FALLBACK_HOST=$fallback_host
 FALLBACK_PORT=$fallback_port
 SSH_USER=$ssh_user
-SSH_KEY_PATH=$ssh_key_path
 EOF
-    info "Config saved to: $config_file"
+    info "Reference saved to: $config_file"
     echo ""
-    echo -e "   ${C_BOLD}Connection summary:${C_RESET}"
-    echo "   Primary:  $ssh_user@$primary_host:$primary_port"
-    [ -n "$fallback_host" ] && echo "   Fallback: $ssh_user@$fallback_host:$fallback_port"
-    echo ""
-    echo "   Enter these details in the ClaudeWatch app on your watch."
+    echo -e "   ${C_BOLD}Enter these in the watch app (Settings → Connection):${C_RESET}"
+    echo "   Host:     $primary_host"
+    echo "   Port:     $primary_port"
+    echo "   Username: $ssh_user"
+    [ -n "$fallback_host" ] && echo "   Fallback: $fallback_host:$fallback_port"
     touch "$STATE_CONN_OK"
     pause
 }
@@ -615,7 +651,7 @@ while true; do
     echo -e "  [3] Install App Dependencies          [$s3]"
     echo -e "  [4] Set up Usage Command (PATH)       [$s4]"
     echo -e "  [5] Configure Claude Code Hook        [$s5]"
-    echo -e "  [6] Generate SSH Key for Watch        [$s6]"
+    echo -e "  [6] Register a Watch Key (authorize)  [$s6]"
     echo -e "  [7] Configure Connection Address      [$s7]"
     echo "  [q] Quit"
     read -p "Enter your choice: " choice
@@ -640,6 +676,6 @@ echo -e "${C_BOLD}Setup Exited. Current configuration status:${C_RESET}\n-------
 [[ -f "$STATE_DEPS_OK" ]] && info "App Dependencies"       || warn "App Dependencies       (run Step 3)"
 [[ -f "$STATE_PATH_OK" ]] && info "Usage Command (PATH)"   || warn "Usage Command (PATH)   (run Step 4)"
 [[ -f "$STATE_HOOK_OK" ]] && info "Claude Code Hook"       || warn "Claude Code Hook       (run Step 5)"
-[[ -f "$STATE_SSH_OK"  ]] && info "SSH Key for Watch"      || warn "SSH Key for Watch      (run Step 6)"
+[[ -f "$STATE_SSH_OK"  ]] && info "Watch Key Authorized"   || warn "Watch Key Authorized   (run Step 6)"
 [[ -f "$STATE_CONN_OK" ]] && info "Connection Address"     || warn "Connection Address     (run Step 7)"
 echo -e "------------------------------------------------------"
