@@ -58,7 +58,10 @@ developer mode + ADB debugging enabled.
 ### 1. Server-Side Setup
 Before using the watch app, you need to configure your server. We've created an interactive wizard that makes this easy.
 
-**On your server**, run the following command. It will download the necessary scripts and guide you through every step of the configuration.
+**On your server**, run the following command.
+
+> **Windows Users:** You must run this command in a terminal that supports `bash`, like **Git Bash** (which comes with [Git for Windows](https://git-scm.com/download/win)) or **WSL**. It will not work in the standard Command Prompt or PowerShell.
+
 ```bash
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/dcqwqc/ClaudeWatch/main/server/install.sh)"
 ```
