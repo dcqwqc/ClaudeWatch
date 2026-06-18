@@ -56,25 +56,21 @@ developer mode + ADB debugging enabled.
 ## First-Run Setup
 
 ### 1. Server-Side Setup
-Before using the watch app, you need to configure your server. This includes scripts for usage stats and push notifications. We've made this easy with a one-line installer.
+Before using the watch app, you need to configure your server. We've created an interactive wizard that makes this easy.
 
-**On your server**, run the following command:
+**On your server**, run the following command. It will download the necessary scripts and guide you through every step of the configuration.
 ```bash
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/dcqwqc/ClaudeWatch/main/server/install.sh)"
 ```
-This will download the necessary scripts to `~/.claude-watch` and print out instructions for the final configuration steps (like setting up Firebase and Claude Code hooks). The full guide is also in `server/README.md`.
 
 ### 2. Watch App Setup
-Once the server is ready and the app is on your watch:
+Once the server setup wizard is complete:
 
-1. Open the app and swipe to the **Settings** screen.
-2. **Host:** Enter your server's address (e.g., `your.server.com`).
-3. **User:** Enter your SSH username for the server.
-4. **Port:** `22` is standard for SSH.
-5. **Tmux Session:** Enter the name of the `tmux` session you want to connect to. This can be **any session**, not just `claude`.
-6. **Generate & Copy Key:** Tap **Generate key pair**, then **Copy public key**.
-7. **Authorize Key:** Paste the public key you just copied into your server's `~/.ssh/authorized_keys` file.
-8. **Save & Test:** Tap **Save**. Go back to the **Usage** or **Terminal** screens to confirm the connection is working.
+1. Open the app on your watch and go to the **Settings** screen.
+2. Fill in your server **Host**, **User**, and **Tmux Session** name.
+3. Tap **Generate key pair**, then **Copy public key**.
+4. Scan the QR code with your phone and paste the public key into your server's `~/.ssh/authorized_keys` file.
+5. Tap **Save** on the watch and test the connection.
 
 ---
 
