@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# ClaudeWatch Server-Side Interactive Setup Utility v3.2
+# ClaudeWatch Server-Side Interactive Setup Utility v3.3
 # A self-updating, persistent, menu-driven wizard for a fully guided setup.
 #
 
@@ -20,10 +20,15 @@ case "$_UNAME" in
 esac
 
 # --- State Markers ---
-STATE_FIREBASE_OK="$TARGET_DIR/.state_firebase_ok"; STATE_DEPS_OK="$TARGET_DIR/.state_deps_ok"; STATE_PATH_OK="$TARGET_DIR/.state_path_ok"; STATE_HOOK_OK="$TARGET_DIR/.state_hook_ok"
+STATE_FIREBASE_OK="$TARGET_DIR/.state_firebase_ok"
+STATE_DEPS_OK="$TARGET_DIR/.state_deps_ok"
+STATE_PATH_OK="$TARGET_DIR/.state_path_ok"
+STATE_HOOK_OK="$TARGET_DIR/.state_hook_ok"
+STATE_SSH_OK="$TARGET_DIR/.state_ssh_ok"
+STATE_CONN_OK="$TARGET_DIR/.state_conn_ok"
 
 # --- Helper Functions ---
-header() { clear; echo -e "${C_GREEN}${C_BOLD}--- ClaudeWatch Server Setup Utility v3.2 ---${C_RESET}
+header() { clear; echo -e "${C_GREEN}${C_BOLD}--- ClaudeWatch Server Setup Utility v3.3 ---${C_RESET}
 This wizard guides you through server configuration. It saves your progress.
 --------------------------------------------------------------------"; }
 step() { echo -e "\n${C_BLUE}==> ${C_BOLD}$1${C_RESET}"; }
@@ -320,6 +325,255 @@ setup_hooks() {
     pause
 }
 
+setup_ssh_key() {
+    step "Step 6: Generating SSH Key for Watch..."
+    echo "   ClaudeWatch uses SSH (a secure encrypted connection) to link your watch"
+    echo "   to this PC. Think of it like a lock-and-key pair:"
+    echo "     • PRIVATE key → goes on your watch (keep this secret)"
+    echo "     • PUBLIC key  → stays on this PC (added to the allowed-connections list)"
+    echo "   You only need ONE key pair — it handles everything."
+    echo ""
+
+    local key_file="$TARGET_DIR/watch_key"
+
+    if [ -f "$key_file" ]; then
+        warn "An SSH key already exists at: $key_file"
+        read -p "   Generate a fresh one? (y/N) " -n 1 -r; echo
+        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            info "Keeping existing key."
+            _display_key_instructions "$key_file"
+            touch "$STATE_SSH_OK"; pause; return
+        fi
+        rm -f "$key_file" "${key_file}.pub"
+    fi
+
+    if ! command_exists ssh-keygen; then
+        warn "ssh-keygen not found. Please install OpenSSH:"
+        if $IS_WINDOWS; then
+            warn "  Run in PowerShell (Admin): Add-WindowsCapability -Online -Name OpenSSH.Client~~~~0.0.1.0"
+        else
+            warn "  sudo apt install openssh-client   (Debian/Ubuntu)"
+        fi
+        pause; return
+    fi
+
+    info "Generating secure SSH key (ed25519)..."
+    ssh-keygen -t ed25519 -f "$key_file" -N "" -C "ClaudeWatch" -q
+    chmod 600 "$key_file"
+
+    mkdir -p "$HOME/.ssh"; chmod 700 "$HOME/.ssh"
+    touch "$HOME/.ssh/authorized_keys"; chmod 600 "$HOME/.ssh/authorized_keys"
+    # Avoid duplicate entries
+    local pub_key; pub_key=$(cat "${key_file}.pub")
+    if ! grep -qF "$pub_key" "$HOME/.ssh/authorized_keys" 2>/dev/null; then
+        echo "$pub_key" >> "$HOME/.ssh/authorized_keys"
+        info "Public key added to ~/.ssh/authorized_keys"
+    else
+        info "Public key already in ~/.ssh/authorized_keys"
+    fi
+
+    _display_key_instructions "$key_file"
+    touch "$STATE_SSH_OK"
+    pause
+}
+
+_display_key_instructions() {
+    local key_file="$1"
+    echo ""
+    echo -e "   ${C_BOLD}Copy the PRIVATE KEY below into the ClaudeWatch app on your watch.${C_RESET}"
+    echo "   (Watch app → Settings → SSH Private Key, paste everything including dashes)"
+    echo ""
+    echo -e "${C_YELLOW}"
+    cat "$key_file"
+    echo -e "${C_RESET}"
+    echo "   The key file is saved at: $key_file"
+    echo "   Run this step again at any time to display it again."
+}
+
+# Connection setup helpers write results into these globals
+_CONN_HOST=""; _CONN_PORT="22"
+
+_setup_conn_local() {
+    _CONN_HOST=""; _CONN_PORT="22"
+    echo ""
+    echo -e "   ${C_BOLD}Local Network Setup${C_RESET}"
+    echo "   This lets the watch connect to your PC when both are on the same WiFi."
+    echo "   It will NOT work when you leave home."
+    echo ""
+
+    # Auto-detect local IP
+    local detected_ip=""
+    if $IS_WINDOWS; then
+        detected_ip=$(powershell -Command "
+            (Get-NetIPAddress -AddressFamily IPv4 |
+             Where-Object { \$_.IPAddress -notmatch '^127\\.' -and \$_.IPAddress -notmatch '^169\\.' } |
+             Sort-Object PrefixLength -Descending |
+             Select-Object -First 1).IPAddress" 2>/dev/null | tr -d '\r\n')
+    else
+        detected_ip=$(hostname -I 2>/dev/null | awk '{print $1}')
+    fi
+
+    if [ -n "$detected_ip" ]; then
+        info "Detected local IP: $detected_ip"
+        read -p "   Use this? (Y/n) " -n 1 -r; echo
+        [[ ! $REPLY =~ ^[Nn]$ ]] && _CONN_HOST="$detected_ip"
+    fi
+
+    if [ -z "$_CONN_HOST" ]; then
+        echo "   Where to find your IP: open Command Prompt and run 'ipconfig'."
+        echo "   Look for 'IPv4 Address' under your WiFi or Ethernet adapter."
+        read -r -p "   Enter local IP: " _CONN_HOST
+    fi
+
+    read -r -p "   SSH port (press Enter for 22): " _p
+    [ -n "$_p" ] && _CONN_PORT="$_p"
+    info "Local address set: $_CONN_HOST:$_CONN_PORT"
+}
+
+_setup_conn_domain() {
+    _CONN_HOST=""; _CONN_PORT="22"
+    echo ""
+    echo -e "   ${C_BOLD}Domain / DDNS Setup${C_RESET}"
+    echo "   A domain name (like yourname.duckdns.org) always points to your PC"
+    echo "   even when your home internet IP changes. Works from anywhere."
+    echo ""
+
+    if ! command_exists ping; then true; fi  # no-op, just for flow
+
+    echo -e "   ${C_BOLD}Don't have a domain yet?${C_RESET} Get a free one:"
+    echo -e "   • DuckDNS    ${C_CYAN}https://www.duckdns.org${C_RESET}"
+    echo "                Sign up, pick a name (e.g. mywatch.duckdns.org),"
+    echo "                install their tiny update app on this PC, done."
+    echo -e "   • desec.io   ${C_CYAN}https://desec.io${C_RESET}  (more features, also free)"
+    echo ""
+    echo "   Also make sure your router forwards port 22 (SSH) to this PC."
+    echo "   (Router admin page → Port Forwarding → add rule: TCP port 22 → this PC's local IP)"
+    echo ""
+    read -r -p "   Your domain or hostname: " _CONN_HOST
+    read -r -p "   SSH port (press Enter for 22, or enter your forwarded port): " _p
+    [ -n "$_p" ] && _CONN_PORT="$_p"
+    [ -n "$_CONN_HOST" ] && info "Domain address set: $_CONN_HOST:$_CONN_PORT"
+}
+
+_setup_conn_tailscale() {
+    _CONN_HOST=""; _CONN_PORT="22"
+    echo ""
+    echo -e "   ${C_BOLD}Tailscale Setup${C_RESET}"
+    echo "   Tailscale is a free service that creates a private encrypted network"
+    echo "   between your devices. Once your PC and watch are both on Tailscale,"
+    echo "   they get permanent addresses (like 100.x.x.x) that never change —"
+    echo "   and it works from anywhere without any port forwarding or domain."
+    echo ""
+    echo "   It's the easiest option if you have no domain or router access."
+    echo ""
+
+    if ! resolve_command tailscale; then
+        warn "Tailscale is not installed on this PC."
+        echo ""
+        echo -e "   ${C_BOLD}Install Tailscale on this PC:${C_RESET}"
+        if $IS_WINDOWS; then
+            echo -e "   Automatic: ${C_CYAN}winget install tailscale.tailscale${C_RESET}"
+            echo -e "   Manual:    ${C_CYAN}https://tailscale.com/download${C_RESET}"
+            echo ""
+            read -p "   Install via winget now? (y/N) " -n 1 -r; echo
+            if [[ $REPLY =~ ^[Yy]$ ]]; then
+                winget install tailscale.tailscale --accept-package-agreements --accept-source-agreements
+                warn "After install: launch Tailscale from the Start menu and log in."
+            fi
+        else
+            echo -e "   Run: ${C_CYAN}curl -fsSL https://tailscale.com/install.sh | sh && sudo tailscale up${C_RESET}"
+        fi
+        echo ""
+        echo -e "   ${C_BOLD}Also install Tailscale on your phone${C_RESET} (the watch connects through it):"
+        echo -e "   ${C_CYAN}https://tailscale.com/download${C_RESET}"
+        echo "   Log in with the SAME Tailscale account on all devices."
+        echo ""
+        echo "   Once everything is connected, re-run this step."
+        pause; return
+    fi
+
+    info "Tailscale is installed."
+    local ts_ip; ts_ip=$(tailscale ip -4 2>/dev/null | head -1 | tr -d '\r\n')
+    if [ -n "$ts_ip" ]; then
+        info "This PC's Tailscale IP: ${C_CYAN}$ts_ip${C_RESET} — enter this in the watch app."
+        read -p "   Use this IP? (Y/n) " -n 1 -r; echo
+        [[ ! $REPLY =~ ^[Nn]$ ]] && _CONN_HOST="$ts_ip"
+    else
+        warn "Could not read Tailscale IP. Is Tailscale running and logged in?"
+        echo "   You can find your PC's Tailscale IP in the Tailscale app (tray icon)."
+        read -r -p "   Enter Tailscale IP manually: " _CONN_HOST
+    fi
+    _CONN_PORT="22"
+    [ -n "$_CONN_HOST" ] && info "Tailscale address set: $_CONN_HOST:$_CONN_PORT"
+}
+
+setup_connection() {
+    step "Step 7: Configuring Connection Address..."
+    echo "   Your watch needs to know WHERE to find this PC. Choose the method"
+    echo "   that best fits your situation:"
+    echo ""
+    echo -e "   ${C_BOLD}[1] Local network only${C_RESET}  — same WiFi as your PC, simple, no extra setup"
+    echo -e "   ${C_BOLD}[2] Domain / DDNS${C_RESET}       — works from anywhere, needs a domain + port forwarding"
+    echo -e "   ${C_BOLD}[3] Tailscale${C_RESET}           — works from anywhere, no domain needed (recommended)"
+    echo ""
+    read -p "   Choose [1/2/3]: " -n 1 conn_choice; echo
+
+    local primary_host="" primary_port="22" fallback_host="" fallback_port="22"
+
+    case $conn_choice in
+        1) _setup_conn_local;     primary_host="$_CONN_HOST"; primary_port="$_CONN_PORT" ;;
+        2) _setup_conn_domain;    primary_host="$_CONN_HOST"; primary_port="$_CONN_PORT" ;;
+        3) _setup_conn_tailscale; primary_host="$_CONN_HOST"; primary_port="$_CONN_PORT" ;;
+        *) warn "Invalid choice."; pause; return ;;
+    esac
+
+    [ -z "$primary_host" ] && { warn "No address entered. Step not completed."; pause; return; }
+
+    # Optional fallback
+    echo ""
+    echo -e "   ${C_BOLD}Fallback address (optional but recommended)${C_RESET}"
+    echo "   Add a secondary address. The watch tries primary first; if it can't"
+    echo "   connect (e.g. you're away from home), it automatically tries the fallback."
+    read -p "   Add a fallback address? (y/N) " -n 1 -r; echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        echo ""
+        echo "   Choose fallback type:"
+        echo "   [1] Local IP  [2] Domain/DDNS  [3] Tailscale"
+        read -p "   Choose [1/2/3]: " -n 1 fb_choice; echo
+        case $fb_choice in
+            1) _setup_conn_local;     fallback_host="$_CONN_HOST"; fallback_port="$_CONN_PORT" ;;
+            2) _setup_conn_domain;    fallback_host="$_CONN_HOST"; fallback_port="$_CONN_PORT" ;;
+            3) _setup_conn_tailscale; fallback_host="$_CONN_HOST"; fallback_port="$_CONN_PORT" ;;
+        esac
+    fi
+
+    # SSH username
+    local ssh_user; ssh_user=$(whoami | tr -d '\r')
+    read -r -p "   SSH username on this PC (Enter for '$ssh_user'): " input_user
+    [ -n "$input_user" ] && ssh_user="$input_user"
+
+    # Write config
+    local config_file="$TARGET_DIR/connection.conf"
+    cat > "$config_file" <<EOF
+# ClaudeWatch Connection Configuration — generated $(date)
+PRIMARY_HOST=$primary_host
+PRIMARY_PORT=$primary_port
+FALLBACK_HOST=$fallback_host
+FALLBACK_PORT=$fallback_port
+SSH_USER=$ssh_user
+SSH_KEY_PATH=$TARGET_DIR/watch_key
+EOF
+    info "Config saved to: $config_file"
+    echo ""
+    echo -e "   ${C_BOLD}Connection summary:${C_RESET}"
+    echo "   Primary:  $ssh_user@$primary_host:$primary_port"
+    [ -n "$fallback_host" ] && echo "   Fallback: $ssh_user@$fallback_host:$fallback_port"
+    echo ""
+    echo "   Enter these details in the ClaudeWatch app on your watch."
+    touch "$STATE_CONN_OK"
+    pause
+}
+
 # --- Main Execution ---
 self_update
 while true; do
@@ -329,12 +583,16 @@ while true; do
     [[ -f "$STATE_DEPS_OK" ]] && s3="✓" || s3=" "
     [[ -f "$STATE_PATH_OK" ]] && s4="✓" || s4=" "
     [[ -f "$STATE_HOOK_OK" ]] && s5="✓" || s5=" "
+    [[ -f "$STATE_SSH_OK" ]] && s6="✓" || s6=" "
+    [[ -f "$STATE_CONN_OK" ]] && s7="✓" || s7=" "
     echo -e "\n  [0] Check/Install All Prerequisites"
     echo "  [1] Download/Update Server Scripts"
     echo -e "  [2] Configure Firebase Notifications  [$s2]"
     echo -e "  [3] Install App Dependencies          [$s3]"
     echo -e "  [4] Set up Usage Command (PATH)       [$s4]"
     echo -e "  [5] Configure Claude Code Hook        [$s5]"
+    echo -e "  [6] Generate SSH Key for Watch        [$s6]"
+    echo -e "  [7] Configure Connection Address      [$s7]"
     echo "  [q] Quit"
     read -p "Enter your choice: " choice
     case $choice in
@@ -344,6 +602,8 @@ while true; do
         3) install_dependencies ;;
         4) setup_path ;;
         5) setup_hooks ;;
+        6) setup_ssh_key ;;
+        7) setup_connection ;;
         q|Q) break ;;
         *) warn "Invalid option." && sleep 1 ;;
     esac
@@ -352,9 +612,10 @@ done
 # --- Final Summary ---
 header
 echo -e "${C_BOLD}Setup Exited. Current configuration status:${C_RESET}\n------------------------------------------------------"
-[[ -f "$STATE_FIREBASE_OK" ]] && info "Firebase Notifications" || warn "Firebase Notifications"
-[[ -f "$STATE_DEPS_OK" ]] && info "App Dependencies" || warn "App Dependencies"
-[[ -f "$STATE_PATH_OK" ]] && info "Usage Command (PATH)" || warn "Usage Command (PATH)"
-[[ -f "$STATE_HOOK_OK" ]] && info "Claude Code Hook" || warn "Claude Code Hook"
+[[ -f "$STATE_FIREBASE_OK" ]] && info "Firebase Notifications" || warn "Firebase Notifications (run Step 2)"
+[[ -f "$STATE_DEPS_OK" ]] && info "App Dependencies"       || warn "App Dependencies       (run Step 3)"
+[[ -f "$STATE_PATH_OK" ]] && info "Usage Command (PATH)"   || warn "Usage Command (PATH)   (run Step 4)"
+[[ -f "$STATE_HOOK_OK" ]] && info "Claude Code Hook"       || warn "Claude Code Hook       (run Step 5)"
+[[ -f "$STATE_SSH_OK"  ]] && info "SSH Key for Watch"      || warn "SSH Key for Watch      (run Step 6)"
+[[ -f "$STATE_CONN_OK" ]] && info "Connection Address"     || warn "Connection Address     (run Step 7)"
 echo -e "------------------------------------------------------"
-prompt "Don't forget: add your watch's public key to ${C_CYAN}~/.ssh/authorized_keys${C_RESET}\n"
