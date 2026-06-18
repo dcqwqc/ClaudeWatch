@@ -118,11 +118,12 @@ class SshManager(private val settingsStore: SettingsStore) {
                 channel.setCommand(command)
                 val stderr = ByteArrayOutputStream()
                 channel.setErrStream(stderr)
+                // stdout lives outside the inputStream.use block so we can read it
+                // after the stream closes to build the ExecResult.
+                val stdout = ByteArrayOutputStream()
 
                 channel.inputStream.use { input ->
-                    val stdout = ByteArrayOutputStream()
                     channel.connect()
-
                     val buf = ByteArray(8192)
                     val deadline = System.currentTimeMillis() + timeoutMs
                     while (true) {
@@ -133,11 +134,7 @@ class SshManager(private val settingsStore: SettingsStore) {
                         }
                         if (channel.isClosed) {
                             if (input.available() > 0) continue
-                            return@withContext ExecResult(
-                                channel.exitStatus,
-                                stdout.toString("UTF-8"),
-                                stderr.toString("UTF-8")
-                            )
+                            break
                         }
                         if (System.currentTimeMillis() > deadline) {
                             throw IOException("SSH exec timed out after ${timeoutMs}ms")
@@ -145,6 +142,14 @@ class SshManager(private val settingsStore: SettingsStore) {
                         Thread.sleep(20)
                     }
                 }
+
+                // Last expression of the try block — the compiler sees ExecResult here,
+                // so withContext<ExecResult> resolves correctly.
+                ExecResult(
+                    channel.exitStatus,
+                    stdout.toString("UTF-8"),
+                    stderr.toString("UTF-8")
+                )
             } catch (e: Exception) {
                 // If the session died, clear it so the next attempt starts fresh
                 synchronized(sessionLock) { if (cachedSession === session) cachedSession = null }
