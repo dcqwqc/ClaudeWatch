@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -13,7 +14,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import kotlinx.coroutines.delay
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -36,6 +36,7 @@ import io.qwqc.claudewatch.presentation.terminal.TerminalsViewModel
 import io.qwqc.claudewatch.presentation.theme.ClaudePalette
 import io.qwqc.claudewatch.presentation.usage.UsageBars
 import io.qwqc.claudewatch.presentation.usage.UsageViewModel
+import kotlinx.coroutines.delay
 
 @Composable
 fun HomeScreen(
@@ -68,7 +69,7 @@ fun HomeScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             // Dancing Claude
-            item { ClaudeMascot(mood = MascotMood.Idle, modifier = Modifier.height(96.dp)) }
+            item { ClaudeMascot(mood = MascotMood.Idle, modifier = Modifier.size(96.dp)) }
 
             // Two usage bars right below the mascot
             item { UsageBars(state = usage, onRetry = usageVm::refresh) }
@@ -145,10 +146,6 @@ private fun TerminalRow(
             contentAlignment = Alignment.Center,
         ) {
             Text("⚙", color = ClaudePalette.Sand)
-        }
-    }
-}
- color = ClaudePalette.Sand)
         }
     }
 }
