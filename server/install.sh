@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# ClaudeWatch Server-Side Interactive Setup Utility v3.1
+# ClaudeWatch Server-Side Interactive Setup Utility v3.2
 # A self-updating, persistent, menu-driven wizard for a fully guided setup.
 #
 
@@ -23,7 +23,7 @@ esac
 STATE_FIREBASE_OK="$TARGET_DIR/.state_firebase_ok"; STATE_DEPS_OK="$TARGET_DIR/.state_deps_ok"; STATE_PATH_OK="$TARGET_DIR/.state_path_ok"; STATE_HOOK_OK="$TARGET_DIR/.state_hook_ok"
 
 # --- Helper Functions ---
-header() { clear; echo -e "${C_GREEN}${C_BOLD}--- ClaudeWatch Server Setup Utility v3.1 ---${C_RESET}
+header() { clear; echo -e "${C_GREEN}${C_BOLD}--- ClaudeWatch Server Setup Utility v3.2 ---${C_RESET}
 This wizard guides you through server configuration. It saves your progress.
 --------------------------------------------------------------------"; }
 step() { echo -e "\n${C_BLUE}==> ${C_BOLD}$1${C_RESET}"; }
@@ -32,6 +32,8 @@ info() { echo -e "   ${C_GREEN}✓${C_RESET} $1"; }
 warn() { echo -e "   ${C_YELLOW}⚠️  $1${C_RESET}"; }
 pause() { read -p "Press [Enter] to return to the main menu..."; }
 command_exists() { command -v "$1" &>/dev/null; }
+# On Windows, check the Windows-native PATH (catches tools just installed by winget)
+win_command_exists() { cmd //c where "$1" &>/dev/null 2>&1; }
 
 # --- Self-Updating Logic ---
 self_update() {
@@ -69,9 +71,7 @@ prompt_to_install() {
     local install_cmd=""
     if [[ "$install_type" == "sys" ]]; then
         if $IS_WINDOWS; then
-            # Windows: try winget → choco → scoop, no sudo needed
             if command_exists winget; then
-                # winget uses different package IDs for some tools
                 local winget_pkg="$pkg_name"
                 [[ "$pkg_name" == "jq" ]] && winget_pkg="jqlang.jq"
                 install_cmd="winget install --id $winget_pkg -e --accept-package-agreements --accept-source-agreements"
@@ -89,7 +89,6 @@ prompt_to_install() {
                 return 1
             fi
         else
-            # Linux / macOS
             if command_exists apt; then install_cmd="sudo apt update && sudo apt install -y $pkg_name"
             elif command_exists yum; then install_cmd="sudo yum install -y $pkg_name"
             elif command_exists dnf; then install_cmd="sudo dnf install -y $pkg_name"
@@ -104,17 +103,41 @@ prompt_to_install() {
     fi
 
     info "Running: $install_cmd"
-    if eval "$install_cmd"; then
-        info "'$pkg_name' installed successfully."
+    eval "$install_cmd"
+    local exit_code=$?
+
+    # Success path 1: command exited 0
+    if [ $exit_code -eq 0 ]; then
+        info "'$cmd_name' installed successfully."
         return 0
-    else
-        warn "Installation failed. Please install '$pkg_name' manually and re-run this step."
-        return 1
     fi
+
+    # Success path 2: winget exits non-zero for "already at latest version" —
+    # the tool may already be present, or was just installed but isn't on this
+    # session's PATH yet (Windows registry PATH update requires a new shell).
+    if $IS_WINDOWS; then
+        if command_exists "$cmd_name" || win_command_exists "$cmd_name"; then
+            info "'$cmd_name' is available (already up to date)."
+            # If not in POSIX PATH, locate and add it for this session
+            if ! command_exists "$cmd_name" && win_command_exists "$cmd_name"; then
+                local win_path; win_path=$(cmd //c where "$cmd_name" 2>/dev/null | head -1 | tr -d '\r\n')
+                if [ -n "$win_path" ]; then
+                    local posix_dir; posix_dir=$(cygpath -u "$(dirname "$win_path")" 2>/dev/null)
+                    [ -n "$posix_dir" ] && export PATH="$PATH:$posix_dir" && info "Added '$cmd_name' to current session PATH."
+                fi
+            fi
+            return 0
+        fi
+    fi
+
+    warn "Installation failed. Please install '$pkg_name' manually and re-run this step."
+    return 1
 }
 
 check_prerequisites() {
     step "Step 0: Checking System Prerequisites..."
+    echo "   ClaudeWatch needs a few standard tools to work. This step checks"
+    echo "   for each one and offers to install any that are missing."
     local all_ok=true
     local deps=("git:git:sys" "python3:python3:sys" "pip:python3-pip:sys" "npm:npm:sys" "jq:jq:sys")
     for dep in "${deps[@]}"; do
@@ -136,6 +159,8 @@ check_prerequisites() {
 # --- Main Setup Functions ---
 download_scripts() {
     step "Step 1: Downloading Server Scripts..."
+    echo "   This downloads the ClaudeWatch server scripts from GitHub into"
+    echo "   $TARGET_DIR on your computer."
     if ! command_exists git; then warn "git is not installed. Please run Step 0."; pause; return; fi
     if [ -d "$TARGET_DIR" ] && [ "$(ls -A "$TARGET_DIR")" ]; then
         prompt "The directory $TARGET_DIR is not empty."
@@ -159,13 +184,17 @@ download_scripts() {
 
 setup_firebase() {
     step "Step 2: Configuring Firebase Notifications..."
+    echo "   ClaudeWatch sends push notifications to your watch via Firebase."
+    echo "   This step connects it to YOUR Firebase project using a private key"
+    echo "   you download from the Firebase website (it stays on your PC only)."
     while true; do
         prompt "Open this link in your browser: ${C_CYAN}https://console.firebase.google.com/${C_RESET}"
-        echo -e "Instructions: 1. Create a project. 2. Go to ${C_BOLD}Project settings > Service Accounts${C_RESET}."
-        echo -e "              3. Click '${C_BOLD}Generate new private key${C_RESET}' and download the JSON file."
-        prompt "Enter the ${C_BOLD}full path${C_RESET} to the downloaded JSON file."
-        echo "   Windows: C:\\Users\\YourName\\Downloads\\my-project-firebase.json"
-        echo "   MSYS:    /c/Users/YourName/Downloads/my-project-firebase.json"
+        echo -e "   1. Create a project (any name)."
+        echo -e "   2. Go to ${C_BOLD}Project settings${C_RESET} (gear icon) → ${C_BOLD}Service Accounts${C_RESET} tab."
+        echo -e "   3. Click '${C_BOLD}Generate new private key${C_RESET}' → confirm → save the JSON file."
+        prompt "Enter the full path to that downloaded JSON file."
+        echo "   Windows path example: C:\\Users\\YourName\\Downloads\\my-project-firebase.json"
+        echo "   MSYS path example:    /c/Users/YourName/Downloads/my-project-firebase.json"
         # -r prevents read from eating backslashes in Windows paths
         read -r -p "Path: " key_path
         # Strip surrounding quotes that users may copy-paste on Windows
@@ -189,10 +218,12 @@ setup_firebase() {
 
 install_dependencies() {
     step "Step 3: Installing App Dependencies..."
+    echo "   This installs the Python and Node.js libraries that the ClaudeWatch"
+    echo "   server scripts need to send notifications and report usage."
     if ! command_exists pip; then
         warn "pip not found. Please run Step 0."
     else
-        info "Installing Python libraries..."
+        info "Installing Python libraries (google-auth, requests)..."
         pip install --user --quiet --disable-pip-version-check google-auth requests
         info "Python libraries installed."
     fi
@@ -211,18 +242,24 @@ install_dependencies() {
 
 setup_path() {
     step "Step 4: Setting up Usage Command (PATH)..."
+    echo "   Your computer has a list of folders called PATH that it searches"
+    echo "   whenever you type a command. This step adds ClaudeWatch's folder"
+    echo "   to that list so you can run 'ccusage' from any terminal window."
     chmod +x "$TARGET_DIR/claude-watch-usage.sh"
     if $IS_WINDOWS; then
-        warn "Windows detected. Automatic PATH modification is not supported here."
-        prompt "Add the scripts directory to your Windows PATH manually:"
-        echo -e "   ${C_CYAN}$TARGET_DIR${C_RESET}"
+        local win_dir; win_dir=$(cygpath -w "$TARGET_DIR" 2>/dev/null || echo "$TARGET_DIR")
         echo ""
-        echo "   Quick method — run this in PowerShell (as your user, no Admin needed):"
-        echo -e "   ${C_CYAN}[Environment]::SetEnvironmentVariable('PATH', \$env:PATH + ';$(cygpath -w "$TARGET_DIR")', 'User')${C_RESET}"
-        read -p "Acknowledge and mark complete? (y/N) " -n 1 -r; echo
+        echo -e "   ${C_BOLD}What to do:${C_RESET} Open PowerShell (Win+X → Terminal) and run this command:"
+        echo ""
+        echo -e "   ${C_CYAN}[Environment]::SetEnvironmentVariable('PATH', \$env:PATH + ';${win_dir}', 'User')${C_RESET}"
+        echo ""
+        echo "   That command permanently adds ClaudeWatch to your PATH for your user"
+        echo "   account (no admin rights needed). After running it, restart your terminal."
+        echo ""
+        read -p "   Have you run the command above? Mark step as complete? (y/N) " -n 1 -r; echo
         if [[ $REPLY =~ ^[Yy]$ ]]; then touch "$STATE_PATH_OK"; fi
     elif [[ "$_UNAME" == "Linux" || "$_UNAME" == "Darwin" ]]; then
-        info "Detected Linux/macOS. Creating symlink..."
+        info "Detected Linux/macOS. Creating symlink in ~/.local/bin..."
         mkdir -p "$HOME/.local/bin"
         ln -sf "$TARGET_DIR/claude-watch-usage.sh" "$HOME/.local/bin/ccusage"
         if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
@@ -236,14 +273,18 @@ setup_path() {
 
 setup_hooks() {
     step "Step 5: Configuring Claude Code Hook..."
+    echo "   Claude Code supports 'hooks' — commands that run automatically at"
+    echo "   certain moments. This step registers the ClaudeWatch notifier as a"
+    echo "   'Stop' hook so your watch buzzes every time Claude finishes a task."
     if ! command_exists jq; then warn "jq not found. Please run Step 0 first."; pause; return; fi
     local settings_file="$HOME/.claude/settings.json"
     local backup_file="$settings_file.bak"
     local hook_cmd="$TARGET_DIR/claude-done-hook.sh"
     chmod +x "$hook_cmd"
     if [ ! -f "$settings_file" ]; then warn "Claude settings file not found at $settings_file"; pause; return; fi
-    prompt "This step will automatically add the 'Stop' hook to $settings_file."
-    read -p "A backup will be created. Proceed? (y/N) " -n 1 -r; echo
+    prompt "This step will automatically edit $settings_file to add the Stop hook."
+    echo "   A backup copy will be saved first so you can always undo."
+    read -p "   Proceed? (y/N) " -n 1 -r; echo
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then warn "Hook setup skipped."; pause; return; fi
     cp "$settings_file" "$backup_file"; info "Backup created at $backup_file"
     local hook_obj='{ "hooks": { "Stop": [ { "hooks": [ { "type": "command", "command": "'"$hook_cmd"'" } ] } ] } }'
@@ -297,4 +338,4 @@ echo -e "${C_BOLD}Setup Exited. Current configuration status:${C_RESET}\n-------
 [[ -f "$STATE_PATH_OK" ]] && info "Usage Command (PATH)" || warn "Usage Command (PATH)"
 [[ -f "$STATE_HOOK_OK" ]] && info "Claude Code Hook" || warn "Claude Code Hook"
 echo -e "------------------------------------------------------"
-prompt "Add your watch's public key to ${C_CYAN}~/.ssh/authorized_keys${C_RESET}\n"
+prompt "Don't forget: add your watch's public key to ${C_CYAN}~/.ssh/authorized_keys${C_RESET}\n"
