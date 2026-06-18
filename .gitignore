@@ -1,14 +1,29 @@
-*.iml
-.gradle/
-/local.properties
-/.idea/
-.DS_Store
-/build
-/captures
-.externalNativeBuild
-.cxx
+# Local properties - contains user-specific paths.
 local.properties
 
-# Secrets — never commit these
+# Android Studio / IntelliJ project files
+.idea/
+*.iml
+*~
+
+# Gradle files
+.gradle/
+build/
+
+# Android build artifacts and outputs
+captures/
+.cxx/
+*.apk
+*.aab
+*.ap_
+*.dex
+
+# Secrets - DO NOT COMMIT
+# This includes the Firebase config for the Android app and the server-side service account.
 app/google-services.json
 **/service-account.json
+*.jks
+*.keystore
+
+# OS-specific files
+.DS_Store
