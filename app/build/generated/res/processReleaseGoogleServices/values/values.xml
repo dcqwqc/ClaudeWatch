@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="gcm_defaultSenderId" translatable="false">317461876838</string>
+    <string name="google_api_key" translatable="false">AIzaSyAc_humKSbj0zTJJwof8zG4y_QiUBdw_AE</string>
+    <string name="google_app_id" translatable="false">1:317461876838:android:da301824acf27fffb4dda7</string>
+    <string name="google_crash_reporting_api_key" translatable="false">AIzaSyAc_humKSbj0zTJJwof8zG4y_QiUBdw_AE</string>
+    <string name="google_storage_bucket" translatable="false">claudewatchbuzz.firebasestorage.app</string>
+    <string name="project_id" translatable="false">claudewatchbuzz</string>
+</resources>

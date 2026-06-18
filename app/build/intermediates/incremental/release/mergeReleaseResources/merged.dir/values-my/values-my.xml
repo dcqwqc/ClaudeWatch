@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:ns1="urn:oasis:names:tc:xliff:document:1.2">
+    <string msgid="7032918537319714491" name="buttons_rect_bottom_center">"အောက်ခြေ"</string>
+    <string msgid="1900303277997254019" name="buttons_rect_bottom_left">"ဘယ်ဘက်အောက်ခြေ"</string>
+    <string msgid="5128261908141175352" name="buttons_rect_bottom_right">"ညာဘက်အောက်ခြေ"</string>
+    <string msgid="2890382227404669440" name="buttons_rect_left_bottom">"အောက်ခြေ၊ ဘယ်ဘက်ခြမ်း"</string>
+    <string msgid="2090348335774325845" name="buttons_rect_left_center">"ဘယ်ဘက် အလယ်"</string>
+    <string msgid="5658240954637179416" name="buttons_rect_left_top">"ထိပ်ပိုင်း၊ ဘယ်ဘက်ခြမ်း"</string>
+    <string msgid="231110280868923853" name="buttons_rect_right_bottom">"အောက်ခြေ၊ ညာဘက်ခြမ်း"</string>
+    <string msgid="9046922334870476704" name="buttons_rect_right_center">"ညာဘက် အလယ်"</string>
+    <string msgid="8781047384037217975" name="buttons_rect_right_top">"ထိပ်ပိုင်း၊ ညာဘက်ခြမ်း"</string>
+    <string msgid="79705740801041383" name="buttons_rect_top_center">"ထိပ်ပိုင်း"</string>
+    <string msgid="7572206729575579647" name="buttons_rect_top_left">"ဘယ်ဘက်ထိပ်"</string>
+    <string msgid="942888900599091776" name="buttons_rect_top_right">"ညာဘက်ထိပ်"</string>
+    <string msgid="7330585893633364324" name="buttons_round_bottom_center">"အောက်ခြေ"</string>
+    <string msgid="2128239325315047486" name="buttons_round_bottom_left">"ဘယ်ဘက်အောက်ခြေ"</string>
+    <string msgid="8840562761052904241" name="buttons_round_bottom_left_lower">"ဘယ်ဘက်အောက်ခြေ၊ အောက်ပိုင်း"</string>
+    <string msgid="5824161271890322696" name="buttons_round_bottom_left_upper">"ဘယ်ဘက်အောက်ခြေ၊ အပေါ်ပိုင်း"</string>
+    <string msgid="2377403938095293895" name="buttons_round_bottom_right">"ညာဘက်အောက်ခြေ"</string>
+    <string msgid="6450671993962362349" name="buttons_round_bottom_right_lower">"ညာဘက်အောက်ခြေ၊ အောက်ပိုင်း"</string>
+    <string msgid="3762205785832512542" name="buttons_round_bottom_right_upper">"ဘယ်ဘက်အောက်ခြေ၊ အပေါ်ပိုင်း"</string>
+    <string msgid="4851687456301428363" name="buttons_round_center_left">"ဘယ်ဘက် အလယ်"</string>
+    <string msgid="1509579668330531551" name="buttons_round_center_right">"ညာဘက် အလယ်"</string>
+    <string msgid="5559087816427379703" name="buttons_round_top_center">"ထိပ်ပိုင်း"</string>
+    <string msgid="6011962751086201079" name="buttons_round_top_left">"ဘယ်ဘက်ထိပ်"</string>
+    <string msgid="4749025344320804614" name="buttons_round_top_left_lower">"ဘယ်ဘက်ထိပ် အောက်ပိုင်း"</string>
+    <string msgid="2546930425604677415" name="buttons_round_top_left_upper">"ဘယ်ဘက်ထိပ် အပေါ်ပိုင်း"</string>
+    <string msgid="4871780374047139328" name="buttons_round_top_right">"ညာဘက်ထိပ်"</string>
+    <string msgid="49744844591556337" name="buttons_round_top_right_lower">"ညာဘက်ထိပ် အောက်ပိုင်း"</string>
+    <string msgid="5489914740902966147" name="buttons_round_top_right_upper">"ညာဘက်ထိပ် အပေါ်ပိုင်း"</string>
+    <string msgid="881409763997275156" name="call_notification_answer_action">"ဖုန်းကိုင်ရန်"</string>
+    <string msgid="8793775615905189152" name="call_notification_answer_video_action">"ဗီဒီယို"</string>
+    <string msgid="3229508546291798546" name="call_notification_decline_action">"ငြင်းပယ်ရန်"</string>
+    <string msgid="2659457946726154263" name="call_notification_hang_up_action">"ဖုန်းချရန်"</string>
+    <string msgid="6107532579223922871" name="call_notification_incoming_text">"အဝင်ခေါ်ဆိုမှု"</string>
+    <string msgid="8623827134497363134" name="call_notification_ongoing_text">"လက်ရှိခေါ်ဆိုမှု"</string>
+    <string msgid="59049573811482460" name="call_notification_screening_text">"အဝင်ခေါ်ဆိုမှုကို စစ်ဆေးနေသည်"</string>
+    <string msgid="406453423630273620" name="close_drawer">"လမ်းညွှန် မီနူး ပိတ်ရန်"</string>
+    <string msgid="7573152094250666567" name="close_sheet">"စာမျက်နှာ ပိတ်ရန်"</string>
+    <string msgid="2523291102206661146" name="common_google_play_services_enable_button">ဖွင့်ရန်</string>
+    <string msgid="227660514972886228" name="common_google_play_services_enable_text">Google Play ဝန်ဆောင်မှုများကို မဖွင့်သ၍ %1$s သည်အလုပ်လုပ်မည်မဟုတ်ပါ။</string>
+    <string msgid="5122002158466380389" name="common_google_play_services_enable_title">Google Play ဝန်ဆောင်မှုများ ဖွင့်ရန်</string>
+    <string msgid="7153882981874058840" name="common_google_play_services_install_button">ထည့်သွင်းပါ</string>
+    <string name="common_google_play_services_install_text">သင့်တက်ဘလက်တွင် Google Play ဝန်ဆောင်မှုများမရှိသောကြောင့် %1$s ကိုဖွင့်၍မရပါ။</string>
+    <string msgid="7215213145546190223" name="common_google_play_services_install_title">Google Play ဝန်ဆောင်မှုများရယူရန်</string>
+    <string name="common_google_play_services_notification_channel_name">Google Play ဝန်ဆောင်မှုများ ရရှိနိုင်သည်</string>
+    <string name="common_google_play_services_notification_ticker">Google Play ဝန်ဆောင်မှုများ အမှား</string>
+    <string name="common_google_play_services_unknown_issue">%1$s သည် Google Play ဝန်ဆောင်မှုများနှင့် ပြဿနာအနည်းငယ် ရှိနေပါသည်။ ထပ်လုပ်ကြည့်ပါ။</string>
+    <string name="common_google_play_services_unsupported_text">Google Play ဝန်ဆောင်မှုများကို သင့်စက်ပစ္စည်းတွင် ပံ့ပိုးမထားသည့်အတွက် ၎င်းမရှိဘဲ %1$s ကို ဖွင့်၍မရပါ။</string>
+    <string msgid="6556509956452265614" name="common_google_play_services_update_button">အပ်ဒိတ်</string>
+    <string msgid="9053896323427875356" name="common_google_play_services_update_text">Google Play ဝန်ဆောင်မှုများအား အပ်ဒိတ်မလုပ်ပါက %1$s အလုပ်လုပ်မည် မဟုတ်ပါ။</string>
+    <string msgid="6006316683626838685" name="common_google_play_services_update_title">Google Play ဝန်ဆောင်မှုများကို အပ်ဒိတ်လုပ်ရန်</string>
+    <string name="common_google_play_services_updating_text">Google Play ဝန်ဆောင်မှုများကို လက်ရှိအပ်ဒိတ်လုပ်နေသောကြောင့် %1$s ကိုဖွင့်၍ရမည်မဟုတ်ပါ။</string>
+    <string name="common_google_play_services_wear_update_text">Google Play ဝန်ဆောင်မှုဗားရှင်းအသစ်များ လိုအပ်နေသည်။ အချိန်အနည်းငယ်အကြာတွင် ၎င်းကိုယ်တိုင်အပ်ဒိတ်လုပ်ပါ လိမ့်မည်။</string>
+    <string name="common_open_on_phone">ဖုန်းပေါ်မှာ ဖွင့်ပါ</string>
+    <string name="common_signin_button_text">လက်မှတ်ထိုး ဝင်ရန်</string>
+    <string name="common_signin_button_text_long">Google ဖြင့် လက်မှတ်ထိုးဝင်ရေ</string>
+    <string msgid="8038256446254964252" name="default_error_message">"ထည့်သွင်းမှု မမှန်ကန်ပါ"</string>
+    <string msgid="6312721426453364202" name="default_popup_window_title">"ပေါ့ပ်အပ် ဝင်းဒိုး"</string>
+    <string msgid="1890207353314751437" name="dropdown_menu">"ဆွဲချမီနူး"</string>
+    <string msgid="6827826412747255547" name="in_progress">"ဆောင်ရွက်နေဆဲ"</string>
+    <string msgid="7933458017204019916" name="indeterminate">"တစ်ဝက်တစ်ပျက် စစ်ဆေးထားသည်"</string>
+    <string msgid="542007171693138492" name="navigation_menu">"လမ်းညွှန် မီနူး"</string>
+    <string msgid="6610465462668679431" name="not_selected">"ရွေးမထားပါ"</string>
+    <string msgid="5941395253238309765" name="range_end">"အပိုင်းအခြား အဆုံး"</string>
+    <string msgid="7097486360902471446" name="range_start">"အပိုင်းအခြား အစ"</string>
+    <string msgid="6043586758067023" name="selected">"ရွေးထားသည်"</string>
+    <string msgid="4139871816613051306" name="state_empty">"မရှိပါ"</string>
+    <string msgid="5834637030682409883" name="state_off">"ပိတ်"</string>
+    <string msgid="1490883874751719580" name="state_on">"ဖွင့်"</string>
+    <string msgid="6277540029070332960" name="status_bar_notification_info_overflow">"၉၉၉+"</string>
+    <string msgid="2561197295334830845" name="switch_role">"ပြောင်းရန်"</string>
+    <string msgid="1672349317127674378" name="tab">"တဘ်"</string>
+    <string msgid="5946805113151406391" name="template_percent">"<ns1:g id="PERCENTAGE">%1$d</ns1:g> ရာခိုင်နှုန်း။"</string>
+    <string msgid="3765533235322692011" name="tooltip_description">"အကြံပြုချက်ပြ ပေါ့အပ် ဝင်းဒိုး"</string>
+    <string msgid="3124740595719787496" name="tooltip_label">"အကြံပြုချက်ပြ ပေါ့အပ်ဝင်းဒိုး ပြရန်"</string>
+</resources>

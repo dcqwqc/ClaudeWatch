@@ -1,0 +1,42 @@
+[
+    {
+        "merged": "io.qwqc.claudewatch.app-release-5:/drawable_ic_notification.xml.flat",
+        "source": "io.qwqc.claudewatch.app-main-6:/drawable/ic_notification.xml"
+    },
+    {
+        "merged": "io.qwqc.claudewatch.app-release-5:/mipmap-hdpi_ic_launcher_foreground.png.flat",
+        "source": "io.qwqc.claudewatch.app-main-6:/mipmap-hdpi/ic_launcher_foreground.png"
+    },
+    {
+        "merged": "io.qwqc.claudewatch.app-release-5:/drawable_ic_launcher_background.xml.flat",
+        "source": "io.qwqc.claudewatch.app-main-6:/drawable/ic_launcher_background.xml"
+    },
+    {
+        "merged": "io.qwqc.claudewatch.app-release-5:/mipmap-mdpi_ic_launcher_foreground.png.flat",
+        "source": "io.qwqc.claudewatch.app-main-6:/mipmap-mdpi/ic_launcher_foreground.png"
+    },
+    {
+        "merged": "io.qwqc.claudewatch.app-release-5:/mipmap-anydpi-v26_ic_launcher_round.xml.flat",
+        "source": "io.qwqc.claudewatch.app-main-6:/mipmap-anydpi-v26/ic_launcher_round.xml"
+    },
+    {
+        "merged": "io.qwqc.claudewatch.app-release-5:/mipmap-xxxhdpi_ic_launcher_foreground.png.flat",
+        "source": "io.qwqc.claudewatch.app-main-6:/mipmap-xxxhdpi/ic_launcher_foreground.png"
+    },
+    {
+        "merged": "io.qwqc.claudewatch.app-release-5:/raw_clawd_laptop.gif.flat",
+        "source": "io.qwqc.claudewatch.app-main-6:/raw/clawd_laptop.gif"
+    },
+    {
+        "merged": "io.qwqc.claudewatch.app-release-5:/mipmap-xhdpi_ic_launcher_foreground.png.flat",
+        "source": "io.qwqc.claudewatch.app-main-6:/mipmap-xhdpi/ic_launcher_foreground.png"
+    },
+    {
+        "merged": "io.qwqc.claudewatch.app-release-5:/mipmap-anydpi-v26_ic_launcher.xml.flat",
+        "source": "io.qwqc.claudewatch.app-main-6:/mipmap-anydpi-v26/ic_launcher.xml"
+    },
+    {
+        "merged": "io.qwqc.claudewatch.app-release-5:/mipmap-xxhdpi_ic_launcher_foreground.png.flat",
+        "source": "io.qwqc.claudewatch.app-main-6:/mipmap-xxhdpi/ic_launcher_foreground.png"
+    }
+]

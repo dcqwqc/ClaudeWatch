@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:ns1="urn:oasis:names:tc:xliff:document:1.2">
+    <string msgid="7032918537319714491" name="buttons_rect_bottom_center">"Alareunassa"</string>
+    <string msgid="1900303277997254019" name="buttons_rect_bottom_left">"Alavasemmalla"</string>
+    <string msgid="5128261908141175352" name="buttons_rect_bottom_right">"Alaoikealla"</string>
+    <string msgid="2890382227404669440" name="buttons_rect_left_bottom">"Vasemmalla alhaalla"</string>
+    <string msgid="2090348335774325845" name="buttons_rect_left_center">"Keskellä vasemmalla"</string>
+    <string msgid="5658240954637179416" name="buttons_rect_left_top">"Vasemmalla ylhäällä"</string>
+    <string msgid="231110280868923853" name="buttons_rect_right_bottom">"Oikealla alhaalla"</string>
+    <string msgid="9046922334870476704" name="buttons_rect_right_center">"Keskellä oikealla"</string>
+    <string msgid="8781047384037217975" name="buttons_rect_right_top">"Oikealla ylhäällä"</string>
+    <string msgid="79705740801041383" name="buttons_rect_top_center">"Yläreunassa"</string>
+    <string msgid="7572206729575579647" name="buttons_rect_top_left">"Ylävasemmalla"</string>
+    <string msgid="942888900599091776" name="buttons_rect_top_right">"Yläoikealla"</string>
+    <string msgid="7330585893633364324" name="buttons_round_bottom_center">"Alareunassa"</string>
+    <string msgid="2128239325315047486" name="buttons_round_bottom_left">"Alavasemmalla"</string>
+    <string msgid="8840562761052904241" name="buttons_round_bottom_left_lower">"Alavasemmalla alempana"</string>
+    <string msgid="5824161271890322696" name="buttons_round_bottom_left_upper">"Alavasemmalla ylempänä"</string>
+    <string msgid="2377403938095293895" name="buttons_round_bottom_right">"Alaoikealla"</string>
+    <string msgid="6450671993962362349" name="buttons_round_bottom_right_lower">"Alaoikealla alempana"</string>
+    <string msgid="3762205785832512542" name="buttons_round_bottom_right_upper">"Alaoikealla ylempänä"</string>
+    <string msgid="4851687456301428363" name="buttons_round_center_left">"Keskellä vasemmalla"</string>
+    <string msgid="1509579668330531551" name="buttons_round_center_right">"Keskellä oikealla"</string>
+    <string msgid="5559087816427379703" name="buttons_round_top_center">"Yläreunassa"</string>
+    <string msgid="6011962751086201079" name="buttons_round_top_left">"Ylävasemmalla"</string>
+    <string msgid="4749025344320804614" name="buttons_round_top_left_lower">"Ylävasemmalla alempana"</string>
+    <string msgid="2546930425604677415" name="buttons_round_top_left_upper">"Ylävasemmalla ylempänä"</string>
+    <string msgid="4871780374047139328" name="buttons_round_top_right">"Yläoikealla"</string>
+    <string msgid="49744844591556337" name="buttons_round_top_right_lower">"Yläoikealla alempana"</string>
+    <string msgid="5489914740902966147" name="buttons_round_top_right_upper">"Yläoikealla ylempänä"</string>
+    <string msgid="881409763997275156" name="call_notification_answer_action">"Vastaa"</string>
+    <string msgid="8793775615905189152" name="call_notification_answer_video_action">"Video"</string>
+    <string msgid="3229508546291798546" name="call_notification_decline_action">"Hylkää"</string>
+    <string msgid="2659457946726154263" name="call_notification_hang_up_action">"Lopeta puhelu"</string>
+    <string msgid="6107532579223922871" name="call_notification_incoming_text">"Saapuva puhelu"</string>
+    <string msgid="8623827134497363134" name="call_notification_ongoing_text">"Käynnissä oleva puhelu"</string>
+    <string msgid="59049573811482460" name="call_notification_screening_text">"Seulotaan saapuvaa puhelua"</string>
+    <string msgid="406453423630273620" name="close_drawer">"Sulje navigointivalikko"</string>
+    <string msgid="7573152094250666567" name="close_sheet">"Sulje taulukko"</string>
+    <string msgid="2523291102206661146" name="common_google_play_services_enable_button">Ota käyttöön</string>
+    <string msgid="227660514972886228" name="common_google_play_services_enable_text">%1$s ei toimi, ellet ota Google Play Palveluita käyttöön.</string>
+    <string msgid="5122002158466380389" name="common_google_play_services_enable_title">Ota Google Play Palvelut käyttöön</string>
+    <string msgid="7153882981874058840" name="common_google_play_services_install_button">Asenna</string>
+    <string name="common_google_play_services_install_text">%1$s ei toimi ilman Google Play Palveluita, jotka puuttuvat laitteeltasi.</string>
+    <string msgid="7215213145546190223" name="common_google_play_services_install_title">Asenna Google Play Palvelut</string>
+    <string name="common_google_play_services_notification_channel_name">Google Play Palveluiden saatavuus</string>
+    <string name="common_google_play_services_notification_ticker">Virhe Google Play -palveluissa</string>
+    <string name="common_google_play_services_unknown_issue">Sovelluksella %1$s on ongelmia Google Play Palveluiden kanssa. Yritä uudelleen.</string>
+    <string name="common_google_play_services_unsupported_text">%1$s ei toimi ilman Google Play Palveluita, joita laitteesi ei tue.</string>
+    <string msgid="6556509956452265614" name="common_google_play_services_update_button">Päivitä</string>
+    <string msgid="9053896323427875356" name="common_google_play_services_update_text">%1$s ei toimi, ellet päivitä Google Play Palveluita.</string>
+    <string msgid="6006316683626838685" name="common_google_play_services_update_title">Päivitä Google Play Palvelut</string>
+    <string name="common_google_play_services_updating_text">%1$s ei toimi ilman Google Play Palveluita, joita päivitetään tällä hetkellä.</string>
+    <string name="common_google_play_services_wear_update_text">Uusi Google Play Palveluiden versio tarvitaan. Se päivittyy pian.</string>
+    <string name="common_open_on_phone">Avaa puhelimessa</string>
+    <string name="common_signin_button_text">Kirjaudu sisään</string>
+    <string name="common_signin_button_text_long">Kirjaudu Google-tilille</string>
+    <string msgid="8038256446254964252" name="default_error_message">"Virheellinen syöte"</string>
+    <string msgid="6312721426453364202" name="default_popup_window_title">"Ponnahdusikkuna"</string>
+    <string msgid="1890207353314751437" name="dropdown_menu">"Avattava valikko"</string>
+    <string msgid="6827826412747255547" name="in_progress">"Kesken"</string>
+    <string msgid="7933458017204019916" name="indeterminate">"Osittain tarkistettu"</string>
+    <string msgid="542007171693138492" name="navigation_menu">"Navigointivalikko"</string>
+    <string msgid="6610465462668679431" name="not_selected">"Ei valittu"</string>
+    <string msgid="5941395253238309765" name="range_end">"Alueen loppu"</string>
+    <string msgid="7097486360902471446" name="range_start">"Alueen alku"</string>
+    <string msgid="6043586758067023" name="selected">"Valittu"</string>
+    <string msgid="4139871816613051306" name="state_empty">"Tyhjä"</string>
+    <string msgid="5834637030682409883" name="state_off">"Pois päältä"</string>
+    <string msgid="1490883874751719580" name="state_on">"Päällä"</string>
+    <string msgid="6277540029070332960" name="status_bar_notification_info_overflow">"999+"</string>
+    <string msgid="2561197295334830845" name="switch_role">"Vaihda"</string>
+    <string msgid="1672349317127674378" name="tab">"Välilehti"</string>
+    <string msgid="5946805113151406391" name="template_percent">"<ns1:g id="PERCENTAGE">%1$d</ns1:g> prosenttia"</string>
+    <string msgid="3765533235322692011" name="tooltip_description">"vihjeteksti"</string>
+    <string msgid="3124740595719787496" name="tooltip_label">"näytä vihjeteksti"</string>
+</resources>

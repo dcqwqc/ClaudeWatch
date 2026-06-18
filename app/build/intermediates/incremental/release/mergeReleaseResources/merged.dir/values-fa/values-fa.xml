@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:ns1="urn:oasis:names:tc:xliff:document:1.2">
+    <string msgid="7032918537319714491" name="buttons_rect_bottom_center">"پایین"</string>
+    <string msgid="1900303277997254019" name="buttons_rect_bottom_left">"پایین سمت چپ"</string>
+    <string msgid="5128261908141175352" name="buttons_rect_bottom_right">"پایین سمت راست"</string>
+    <string msgid="2890382227404669440" name="buttons_rect_left_bottom">"پایین، سمت چپ"</string>
+    <string msgid="2090348335774325845" name="buttons_rect_left_center">"چپ مرکز"</string>
+    <string msgid="5658240954637179416" name="buttons_rect_left_top">"بالا، سمت چپ"</string>
+    <string msgid="231110280868923853" name="buttons_rect_right_bottom">"پایین، سمت راست"</string>
+    <string msgid="9046922334870476704" name="buttons_rect_right_center">"راست مرکز"</string>
+    <string msgid="8781047384037217975" name="buttons_rect_right_top">"بالا، سمت راست"</string>
+    <string msgid="79705740801041383" name="buttons_rect_top_center">"بالا"</string>
+    <string msgid="7572206729575579647" name="buttons_rect_top_left">"بالا سمت چپ"</string>
+    <string msgid="942888900599091776" name="buttons_rect_top_right">"بالا سمت راست"</string>
+    <string msgid="7330585893633364324" name="buttons_round_bottom_center">"پایین"</string>
+    <string msgid="2128239325315047486" name="buttons_round_bottom_left">"پایین سمت چپ"</string>
+    <string msgid="8840562761052904241" name="buttons_round_bottom_left_lower">"پایین سمت چپ، پایینی"</string>
+    <string msgid="5824161271890322696" name="buttons_round_bottom_left_upper">"پایین سمت چپ، بالایی"</string>
+    <string msgid="2377403938095293895" name="buttons_round_bottom_right">"پایین سمت راست"</string>
+    <string msgid="6450671993962362349" name="buttons_round_bottom_right_lower">"پایین سمت راست، پایینی"</string>
+    <string msgid="3762205785832512542" name="buttons_round_bottom_right_upper">"پایین سمت راست، بالایی"</string>
+    <string msgid="4851687456301428363" name="buttons_round_center_left">"چپ مرکز"</string>
+    <string msgid="1509579668330531551" name="buttons_round_center_right">"راست مرکز"</string>
+    <string msgid="5559087816427379703" name="buttons_round_top_center">"بالا"</string>
+    <string msgid="6011962751086201079" name="buttons_round_top_left">"بالا سمت چپ"</string>
+    <string msgid="4749025344320804614" name="buttons_round_top_left_lower">"بالا سمت چپ، پایینی"</string>
+    <string msgid="2546930425604677415" name="buttons_round_top_left_upper">"بالا سمت چپ، بالایی"</string>
+    <string msgid="4871780374047139328" name="buttons_round_top_right">"بالا سمت راست"</string>
+    <string msgid="49744844591556337" name="buttons_round_top_right_lower">"بالا سمت راست، پایینی"</string>
+    <string msgid="5489914740902966147" name="buttons_round_top_right_upper">"بالا سمت راست، بالایی"</string>
+    <string msgid="881409763997275156" name="call_notification_answer_action">"پاسخ دادن"</string>
+    <string msgid="8793775615905189152" name="call_notification_answer_video_action">"ویدیو"</string>
+    <string msgid="3229508546291798546" name="call_notification_decline_action">"رد کردن"</string>
+    <string msgid="2659457946726154263" name="call_notification_hang_up_action">"قطع تماس"</string>
+    <string msgid="6107532579223922871" name="call_notification_incoming_text">"تماس ورودی"</string>
+    <string msgid="8623827134497363134" name="call_notification_ongoing_text">"تماس درحال انجام"</string>
+    <string msgid="59049573811482460" name="call_notification_screening_text">"درحال غربال کردن تماس ورودی"</string>
+    <string msgid="406453423630273620" name="close_drawer">"بستن منوی پیمایش"</string>
+    <string msgid="7573152094250666567" name="close_sheet">"بستن برگ"</string>
+    <string msgid="2523291102206661146" name="common_google_play_services_enable_button">فعال کردن</string>
+    <string msgid="227660514972886228" name="common_google_play_services_enable_text">‏تا وقتی «خدمات Google Play» را فعال نکنید، %1$s کار نمی‌کند.</string>
+    <string msgid="5122002158466380389" name="common_google_play_services_enable_title">‏‫فعال کردن «خدمات Google Play»</string>
+    <string msgid="7153882981874058840" name="common_google_play_services_install_button">نصب</string>
+    <string name="common_google_play_services_install_text">‏%1$s بدون خدمات Google Play که در دستگاه شما وجود ندارد اجرا نمی‌شود.</string>
+    <string msgid="7215213145546190223" name="common_google_play_services_install_title">‏دریافت «خدمات Google Play»</string>
+    <string name="common_google_play_services_notification_channel_name">‏دردسترس بودن خدمات Google Play</string>
+    <string name="common_google_play_services_notification_ticker">‏خطا در خدمات Google Play</string>
+    <string name="common_google_play_services_unknown_issue">‏%1$s برای استفاده از خدمات Google Play با مشکل روبرو است. لطفاً دوباره امتحان کنید.</string>
+    <string name="common_google_play_services_unsupported_text">‏%1$s بدون خدمات Google Play که در دستگاه شما پشتیبانی نمی‌شود، اجرا نخواهد شد.</string>
+    <string msgid="6556509956452265614" name="common_google_play_services_update_button">به‌روزرسانی</string>
+    <string msgid="9053896323427875356" name="common_google_play_services_update_text">‏تاز مانی که «خدمات Google Play» را به‌روزرسانی نکنید، %1$s اجرا نمی‌شود.</string>
+    <string msgid="6006316683626838685" name="common_google_play_services_update_title">‏‫به‌روزرسانی «خدمات Google Play»</string>
+    <string name="common_google_play_services_updating_text">‏%1$s بدون «خدمات Google Play» که درحال حاضر درحال به‌روزرسانی هستند، کار نمی‌کند.</string>
+    <string name="common_google_play_services_wear_update_text">‏نسخه جدید «خدمات Google Play» نیاز است. به‌زودی به‌طور خودکار به‌روزرسانی می‌شود.</string>
+    <string name="common_open_on_phone">باز کردن در تلفن</string>
+    <string name="common_signin_button_text">ورود به سیستم</string>
+    <string name="common_signin_button_text_long">‏ورود به سیستم با Google‎</string>
+    <string msgid="8038256446254964252" name="default_error_message">"ورودی نامعتبر"</string>
+    <string msgid="6312721426453364202" name="default_popup_window_title">"پنجره بالاپر"</string>
+    <string msgid="1890207353314751437" name="dropdown_menu">"منوی کرکره‌ای"</string>
+    <string msgid="6827826412747255547" name="in_progress">"درحال انجام"</string>
+    <string msgid="7933458017204019916" name="indeterminate">"برخی موارد علامت‌گذاری شده است"</string>
+    <string msgid="542007171693138492" name="navigation_menu">"منوی پیمایش"</string>
+    <string msgid="6610465462668679431" name="not_selected">"انتخاب‌نشده"</string>
+    <string msgid="5941395253238309765" name="range_end">"پایان محدوده"</string>
+    <string msgid="7097486360902471446" name="range_start">"شروع محدوده"</string>
+    <string msgid="6043586758067023" name="selected">"انتخاب شد"</string>
+    <string msgid="4139871816613051306" name="state_empty">"خالی"</string>
+    <string msgid="5834637030682409883" name="state_off">"خاموش"</string>
+    <string msgid="1490883874751719580" name="state_on">"روشن"</string>
+    <string msgid="6277540029070332960" name="status_bar_notification_info_overflow">"999+"</string>
+    <string msgid="2561197295334830845" name="switch_role">"کلید"</string>
+    <string msgid="1672349317127674378" name="tab">"برگه"</string>
+    <string msgid="5946805113151406391" name="template_percent">"<ns1:g id="PERCENTAGE">%1$d</ns1:g> درصد."</string>
+    <string msgid="3765533235322692011" name="tooltip_description">"نکته‌ابزار"</string>
+    <string msgid="3124740595719787496" name="tooltip_label">"نمایش نکته‌ابزار"</string>
+</resources>

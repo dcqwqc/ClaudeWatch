@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:ns1="urn:oasis:names:tc:xliff:document:1.2">
+    <string msgid="7032918537319714491" name="buttons_rect_bottom_center">"Унизу"</string>
+    <string msgid="1900303277997254019" name="buttons_rect_bottom_left">"Унизу ліворуч"</string>
+    <string msgid="5128261908141175352" name="buttons_rect_bottom_right">"Унизу праворуч"</string>
+    <string msgid="2890382227404669440" name="buttons_rect_left_bottom">"У лівому нижньому куті"</string>
+    <string msgid="2090348335774325845" name="buttons_rect_left_center">"Посередині ліворуч"</string>
+    <string msgid="5658240954637179416" name="buttons_rect_left_top">"У лівому верхньому куті"</string>
+    <string msgid="231110280868923853" name="buttons_rect_right_bottom">"У правому нижньому куті"</string>
+    <string msgid="9046922334870476704" name="buttons_rect_right_center">"Посередині праворуч"</string>
+    <string msgid="8781047384037217975" name="buttons_rect_right_top">"У правому верхньому куті"</string>
+    <string msgid="79705740801041383" name="buttons_rect_top_center">"Угорі"</string>
+    <string msgid="7572206729575579647" name="buttons_rect_top_left">"Угорі ліворуч"</string>
+    <string msgid="942888900599091776" name="buttons_rect_top_right">"Угорі праворуч"</string>
+    <string msgid="7330585893633364324" name="buttons_round_bottom_center">"Унизу"</string>
+    <string msgid="2128239325315047486" name="buttons_round_bottom_left">"Унизу ліворуч"</string>
+    <string msgid="8840562761052904241" name="buttons_round_bottom_left_lower">"Унизу ліворуч, нижче"</string>
+    <string msgid="5824161271890322696" name="buttons_round_bottom_left_upper">"Унизу ліворуч, вище"</string>
+    <string msgid="2377403938095293895" name="buttons_round_bottom_right">"Унизу праворуч"</string>
+    <string msgid="6450671993962362349" name="buttons_round_bottom_right_lower">"Унизу праворуч, нижче"</string>
+    <string msgid="3762205785832512542" name="buttons_round_bottom_right_upper">"Унизу праворуч, вище"</string>
+    <string msgid="4851687456301428363" name="buttons_round_center_left">"Посередині ліворуч"</string>
+    <string msgid="1509579668330531551" name="buttons_round_center_right">"Посередині праворуч"</string>
+    <string msgid="5559087816427379703" name="buttons_round_top_center">"Угорі"</string>
+    <string msgid="6011962751086201079" name="buttons_round_top_left">"Угорі ліворуч"</string>
+    <string msgid="4749025344320804614" name="buttons_round_top_left_lower">"Угорі ліворуч, нижче"</string>
+    <string msgid="2546930425604677415" name="buttons_round_top_left_upper">"Угорі ліворуч, вище"</string>
+    <string msgid="4871780374047139328" name="buttons_round_top_right">"Угорі праворуч"</string>
+    <string msgid="49744844591556337" name="buttons_round_top_right_lower">"Угорі праворуч, нижче"</string>
+    <string msgid="5489914740902966147" name="buttons_round_top_right_upper">"Угорі праворуч, вище"</string>
+    <string msgid="881409763997275156" name="call_notification_answer_action">"Відповісти"</string>
+    <string msgid="8793775615905189152" name="call_notification_answer_video_action">"Відео"</string>
+    <string msgid="3229508546291798546" name="call_notification_decline_action">"Відхилити"</string>
+    <string msgid="2659457946726154263" name="call_notification_hang_up_action">"Завершити"</string>
+    <string msgid="6107532579223922871" name="call_notification_incoming_text">"Вхідний виклик"</string>
+    <string msgid="8623827134497363134" name="call_notification_ongoing_text">"Активний виклик"</string>
+    <string msgid="59049573811482460" name="call_notification_screening_text">"Вхідний виклик (Фільтр)"</string>
+    <string msgid="406453423630273620" name="close_drawer">"Закрити меню навігації"</string>
+    <string msgid="7573152094250666567" name="close_sheet">"Закрити аркуш"</string>
+    <string msgid="2523291102206661146" name="common_google_play_services_enable_button">Увімкнути</string>
+    <string msgid="227660514972886228" name="common_google_play_services_enable_text">Додаток %1$s не працюватиме, якщо не ввімкнути сервіси Google Play.</string>
+    <string msgid="5122002158466380389" name="common_google_play_services_enable_title">Увімкнути сервіси Google Play</string>
+    <string msgid="7153882981874058840" name="common_google_play_services_install_button">Установити</string>
+    <string name="common_google_play_services_install_text">Додаток %1$s не працюватиме без сервісів Google Play, яких немає на вашому пристрої.</string>
+    <string msgid="7215213145546190223" name="common_google_play_services_install_title">Установити сервіси Google Play</string>
+    <string name="common_google_play_services_notification_channel_name">Доступність сервісів Google Play</string>
+    <string name="common_google_play_services_notification_ticker">Помилка сервісів Google Play</string>
+    <string name="common_google_play_services_unknown_issue">У додатку %1$s виникла проблема із сервісами Google Play. Повторіть спробу.</string>
+    <string name="common_google_play_services_unsupported_text">Додаток %1$s не працюватиме без сервісів Google Play, які не підтримуються на вашому пристрої.</string>
+    <string msgid="6556509956452265614" name="common_google_play_services_update_button">Оновити</string>
+    <string msgid="9053896323427875356" name="common_google_play_services_update_text">Додаток %1$s не працюватиме, якщо не оновити сервіси Google Play.</string>
+    <string msgid="6006316683626838685" name="common_google_play_services_update_title">Оновіть сервіси Google Play</string>
+    <string name="common_google_play_services_updating_text">Додаток %1$s не працюватиме без сервісів Google Play, які зараз оновлюються.</string>
+    <string name="common_google_play_services_wear_update_text">Потрібна нова версія сервісів Google Play. Вони невдовзі оновляться.</string>
+    <string name="common_open_on_phone">Відкрити на телефоні</string>
+    <string name="common_signin_button_text">Увійти</string>
+    <string name="common_signin_button_text_long">Увійти в облік. запис Google</string>
+    <string msgid="8038256446254964252" name="default_error_message">"Введено недійсні дані"</string>
+    <string msgid="6312721426453364202" name="default_popup_window_title">"Спливаюче вікно"</string>
+    <string msgid="1890207353314751437" name="dropdown_menu">"Спадне меню"</string>
+    <string msgid="6827826412747255547" name="in_progress">"Виконується"</string>
+    <string msgid="7933458017204019916" name="indeterminate">"Частково вибрано"</string>
+    <string msgid="542007171693138492" name="navigation_menu">"Меню навігації"</string>
+    <string msgid="6610465462668679431" name="not_selected">"Не вибрано"</string>
+    <string msgid="5941395253238309765" name="range_end">"Кінець діапазону"</string>
+    <string msgid="7097486360902471446" name="range_start">"Початок діапазону"</string>
+    <string msgid="6043586758067023" name="selected">"Вибрано"</string>
+    <string msgid="4139871816613051306" name="state_empty">"Пусто"</string>
+    <string msgid="5834637030682409883" name="state_off">"Вимкнено"</string>
+    <string msgid="1490883874751719580" name="state_on">"Увімкнено"</string>
+    <string msgid="6277540029070332960" name="status_bar_notification_info_overflow">"999+"</string>
+    <string msgid="2561197295334830845" name="switch_role">"Перемикач"</string>
+    <string msgid="1672349317127674378" name="tab">"Вкладка"</string>
+    <string msgid="5946805113151406391" name="template_percent">"Відсотків: <ns1:g id="PERCENTAGE">%1$d</ns1:g>."</string>
+    <string msgid="3765533235322692011" name="tooltip_description">"спливаюча підказка"</string>
+    <string msgid="3124740595719787496" name="tooltip_label">"показати спливаючу підказку"</string>
+</resources>

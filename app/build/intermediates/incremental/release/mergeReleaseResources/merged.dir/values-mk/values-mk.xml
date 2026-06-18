@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:ns1="urn:oasis:names:tc:xliff:document:1.2">
+    <string msgid="7032918537319714491" name="buttons_rect_bottom_center">"Долу"</string>
+    <string msgid="1900303277997254019" name="buttons_rect_bottom_left">"Долу лево"</string>
+    <string msgid="5128261908141175352" name="buttons_rect_bottom_right">"Долу десно"</string>
+    <string msgid="2890382227404669440" name="buttons_rect_left_bottom">"Долу, на левата страна"</string>
+    <string msgid="2090348335774325845" name="buttons_rect_left_center">"Во средина, лево"</string>
+    <string msgid="5658240954637179416" name="buttons_rect_left_top">"Горе, на левата страна"</string>
+    <string msgid="231110280868923853" name="buttons_rect_right_bottom">"Долу, на десната страна"</string>
+    <string msgid="9046922334870476704" name="buttons_rect_right_center">"Во средина, десно"</string>
+    <string msgid="8781047384037217975" name="buttons_rect_right_top">"Горе, на десната страна"</string>
+    <string msgid="79705740801041383" name="buttons_rect_top_center">"Горе"</string>
+    <string msgid="7572206729575579647" name="buttons_rect_top_left">"Горе лево"</string>
+    <string msgid="942888900599091776" name="buttons_rect_top_right">"Горе десно"</string>
+    <string msgid="7330585893633364324" name="buttons_round_bottom_center">"Долу"</string>
+    <string msgid="2128239325315047486" name="buttons_round_bottom_left">"Долу лево"</string>
+    <string msgid="8840562761052904241" name="buttons_round_bottom_left_lower">"Долу лево, пониско"</string>
+    <string msgid="5824161271890322696" name="buttons_round_bottom_left_upper">"Долу лево, повисоко"</string>
+    <string msgid="2377403938095293895" name="buttons_round_bottom_right">"Долу десно"</string>
+    <string msgid="6450671993962362349" name="buttons_round_bottom_right_lower">"Долу десно, пониско"</string>
+    <string msgid="3762205785832512542" name="buttons_round_bottom_right_upper">"Долу десно, повисоко"</string>
+    <string msgid="4851687456301428363" name="buttons_round_center_left">"Во средина, лево"</string>
+    <string msgid="1509579668330531551" name="buttons_round_center_right">"Во средина, десно"</string>
+    <string msgid="5559087816427379703" name="buttons_round_top_center">"Горе"</string>
+    <string msgid="6011962751086201079" name="buttons_round_top_left">"Горе лево"</string>
+    <string msgid="4749025344320804614" name="buttons_round_top_left_lower">"Горе лево, пониско"</string>
+    <string msgid="2546930425604677415" name="buttons_round_top_left_upper">"Горе лево, повисоко"</string>
+    <string msgid="4871780374047139328" name="buttons_round_top_right">"Горе десно"</string>
+    <string msgid="49744844591556337" name="buttons_round_top_right_lower">"Горе десно, пониско"</string>
+    <string msgid="5489914740902966147" name="buttons_round_top_right_upper">"Горе десно, повисоко"</string>
+    <string msgid="881409763997275156" name="call_notification_answer_action">"Одговори"</string>
+    <string msgid="8793775615905189152" name="call_notification_answer_video_action">"Видео"</string>
+    <string msgid="3229508546291798546" name="call_notification_decline_action">"Одбиј"</string>
+    <string msgid="2659457946726154263" name="call_notification_hang_up_action">"Спушти"</string>
+    <string msgid="6107532579223922871" name="call_notification_incoming_text">"Дојдовен повик"</string>
+    <string msgid="8623827134497363134" name="call_notification_ongoing_text">"Тековен повик"</string>
+    <string msgid="59049573811482460" name="call_notification_screening_text">"Проверка на дојдовен повик"</string>
+    <string msgid="406453423630273620" name="close_drawer">"Затворете го менито за навигација"</string>
+    <string msgid="7573152094250666567" name="close_sheet">"Затворете го листот"</string>
+    <string msgid="2523291102206661146" name="common_google_play_services_enable_button">Овозможи</string>
+    <string msgid="227660514972886228" name="common_google_play_services_enable_text">%1$s нема да се извршува ако не овозможите услуги на Google Play.</string>
+    <string msgid="5122002158466380389" name="common_google_play_services_enable_title">Овозможи ги услугите на Google Play</string>
+    <string msgid="7153882981874058840" name="common_google_play_services_install_button">Инсталирај</string>
+    <string name="common_google_play_services_install_text">%1$s нема да се извршува без услугите на Google Play што ги нема на уредот.</string>
+    <string msgid="7215213145546190223" name="common_google_play_services_install_title">Преземи ги услугите на Google Play</string>
+    <string name="common_google_play_services_notification_channel_name">Достапност на услугите на Google Play</string>
+    <string name="common_google_play_services_notification_ticker">Грешка на услугите на Google Play</string>
+    <string name="common_google_play_services_unknown_issue">%1$s има проблеми со услугите на Google Play. Обидете се повторно.</string>
+    <string name="common_google_play_services_unsupported_text">%1$s нема да се извршува без услугите на Google Play, што не се подржани од уредов.</string>
+    <string msgid="6556509956452265614" name="common_google_play_services_update_button">Ажурирај</string>
+    <string msgid="9053896323427875356" name="common_google_play_services_update_text">%1$s нема да се извршува ако не ги ажурирате услугите на Google Play.</string>
+    <string msgid="6006316683626838685" name="common_google_play_services_update_title">Ажурирај ги услугите на Google Play</string>
+    <string name="common_google_play_services_updating_text">%1$s нема да се извршува без услугите на Google Play што се ажурираат во моментов.</string>
+    <string name="common_google_play_services_wear_update_text">Потребна е нова верзија на услугите на Google Play. Таа наскоро самата ќе се ажурира.</string>
+    <string name="common_open_on_phone">Отвори на телефонот</string>
+    <string name="common_signin_button_text">Најави се</string>
+    <string name="common_signin_button_text_long">Најави се со Google</string>
+    <string msgid="8038256446254964252" name="default_error_message">"Неважечки запис"</string>
+    <string msgid="6312721426453364202" name="default_popup_window_title">"Скокачки прозорец"</string>
+    <string msgid="1890207353314751437" name="dropdown_menu">"Паѓачко мени"</string>
+    <string msgid="6827826412747255547" name="in_progress">"Во тек"</string>
+    <string msgid="7933458017204019916" name="indeterminate">"Делумно проверено"</string>
+    <string msgid="542007171693138492" name="navigation_menu">"Мени за навигација"</string>
+    <string msgid="6610465462668679431" name="not_selected">"Не е избрано"</string>
+    <string msgid="5941395253238309765" name="range_end">"Крај на опсегот"</string>
+    <string msgid="7097486360902471446" name="range_start">"Почеток на опсегот"</string>
+    <string msgid="6043586758067023" name="selected">"Избрано"</string>
+    <string msgid="4139871816613051306" name="state_empty">"Празно"</string>
+    <string msgid="5834637030682409883" name="state_off">"Исклучено"</string>
+    <string msgid="1490883874751719580" name="state_on">"Вклучено"</string>
+    <string msgid="6277540029070332960" name="status_bar_notification_info_overflow">"999+"</string>
+    <string msgid="2561197295334830845" name="switch_role">"Прекинувач"</string>
+    <string msgid="1672349317127674378" name="tab">"Картичка"</string>
+    <string msgid="5946805113151406391" name="template_percent">"<ns1:g id="PERCENTAGE">%1$d</ns1:g> проценти."</string>
+    <string msgid="3765533235322692011" name="tooltip_description">"совет за алатка"</string>
+    <string msgid="3124740595719787496" name="tooltip_label">"прикажи совет за алатка"</string>
+</resources>

@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:ns1="urn:oasis:names:tc:xliff:document:1.2">
+    <string msgid="7032918537319714491" name="buttons_rect_bottom_center">"তলৰ অংশত"</string>
+    <string msgid="1900303277997254019" name="buttons_rect_bottom_left">"বাওঁফালে তলত"</string>
+    <string msgid="5128261908141175352" name="buttons_rect_bottom_right">"সোঁফালে তলত"</string>
+    <string msgid="2890382227404669440" name="buttons_rect_left_bottom">"তলত, বাওঁফালে"</string>
+    <string msgid="2090348335774325845" name="buttons_rect_left_center">"বাওঁফালে মাজত"</string>
+    <string msgid="5658240954637179416" name="buttons_rect_left_top">"ওপৰত, বাওঁফালে"</string>
+    <string msgid="231110280868923853" name="buttons_rect_right_bottom">"তলত, সোঁফালে"</string>
+    <string msgid="9046922334870476704" name="buttons_rect_right_center">"সোঁফালে মাজত"</string>
+    <string msgid="8781047384037217975" name="buttons_rect_right_top">"ওপৰত, সোঁফালে"</string>
+    <string msgid="79705740801041383" name="buttons_rect_top_center">"ওপৰৰ অংশত"</string>
+    <string msgid="7572206729575579647" name="buttons_rect_top_left">"ওপৰৰ বাওঁফালে"</string>
+    <string msgid="942888900599091776" name="buttons_rect_top_right">"ওপৰৰ সোঁফালে"</string>
+    <string msgid="7330585893633364324" name="buttons_round_bottom_center">"তলৰ অংশত"</string>
+    <string msgid="2128239325315047486" name="buttons_round_bottom_left">"বাওঁফালে তলত"</string>
+    <string msgid="8840562761052904241" name="buttons_round_bottom_left_lower">"বাওঁফালে তলত, তললৈ"</string>
+    <string msgid="5824161271890322696" name="buttons_round_bottom_left_upper">"বাওঁফালে তলত, ওপৰলৈ"</string>
+    <string msgid="2377403938095293895" name="buttons_round_bottom_right">"সোঁফালে তলত"</string>
+    <string msgid="6450671993962362349" name="buttons_round_bottom_right_lower">"সোঁফালে তলত, তললৈ"</string>
+    <string msgid="3762205785832512542" name="buttons_round_bottom_right_upper">"সোঁফালে তলত, ওপৰলৈ"</string>
+    <string msgid="4851687456301428363" name="buttons_round_center_left">"বাওঁফালে মাজত"</string>
+    <string msgid="1509579668330531551" name="buttons_round_center_right">"সোঁফালে মাজত"</string>
+    <string msgid="5559087816427379703" name="buttons_round_top_center">"ওপৰৰ অংশত"</string>
+    <string msgid="6011962751086201079" name="buttons_round_top_left">"ওপৰৰ বাওঁফালে"</string>
+    <string msgid="4749025344320804614" name="buttons_round_top_left_lower">"ওপৰৰ বাওঁফালে, তললৈ"</string>
+    <string msgid="2546930425604677415" name="buttons_round_top_left_upper">"ওপৰৰ বাওঁফালে, ওপৰলৈ"</string>
+    <string msgid="4871780374047139328" name="buttons_round_top_right">"ওপৰৰ সোঁফালে"</string>
+    <string msgid="49744844591556337" name="buttons_round_top_right_lower">"ওপৰৰ সোঁফালে, তললৈ"</string>
+    <string msgid="5489914740902966147" name="buttons_round_top_right_upper">"ওপৰৰ সোঁফালে, ওপৰলৈ"</string>
+    <string msgid="881409763997275156" name="call_notification_answer_action">"উত্তৰ দিয়ক"</string>
+    <string msgid="8793775615905189152" name="call_notification_answer_video_action">"ভিডিঅ’"</string>
+    <string msgid="3229508546291798546" name="call_notification_decline_action">"প্ৰত্যাখ্যান কৰক"</string>
+    <string msgid="2659457946726154263" name="call_notification_hang_up_action">"কল কাটি দিয়ক"</string>
+    <string msgid="6107532579223922871" name="call_notification_incoming_text">"অন্তৰ্গামী কল"</string>
+    <string msgid="8623827134497363134" name="call_notification_ongoing_text">"চলি থকা কল"</string>
+    <string msgid="59049573811482460" name="call_notification_screening_text">"এটা অন্তৰ্গামী কলৰ পৰীক্ষা কৰি থকা হৈছে"</string>
+    <string msgid="406453423630273620" name="close_drawer">"নেভিগেশ্বন মেনু বন্ধ কৰক"</string>
+    <string msgid="7573152094250666567" name="close_sheet">"শ্বীট বন্ধ কৰক"</string>
+    <string msgid="2523291102206661146" name="common_google_play_services_enable_button">সক্ষম কৰক</string>
+    <string msgid="227660514972886228" name="common_google_play_services_enable_text">আপুনি Google Play সেৱাবোৰ সক্ষম নকৰালৈকে %1$sএ কাম নকৰিব।</string>
+    <string msgid="5122002158466380389" name="common_google_play_services_enable_title">Google প্লে সেৱাসক্ষম কৰক</string>
+    <string msgid="7153882981874058840" name="common_google_play_services_install_button">ইনষ্টল কৰক</string>
+    <string name="common_google_play_services_install_text">%1$s Google প্লে সেৱাৰ অবিহনে নচলে, যিটো আপোনাৰ ডিভাইচত নাই।</string>
+    <string msgid="7215213145546190223" name="common_google_play_services_install_title">Google প্লে সেৱালাভ কৰক</string>
+    <string name="common_google_play_services_notification_channel_name">Google প্লে সেৱাসমূহৰ উপলব্ধতা</string>
+    <string name="common_google_play_services_notification_ticker">Google Playৰ সেৱা সম্পৰ্কীয় আসোঁৱাহ</string>
+    <string name="common_google_play_services_unknown_issue">Google প্লে সেৱাত %1$s ত সমস্যা হৈ আছে। আকৌ চেষ্টা কৰক।</string>
+    <string name="common_google_play_services_unsupported_text">%1$s Google প্লে সেৱাৰ অবিহনে নচলে, যিবোৰ আপোনাৰ ডিভাইচত চলিব নোৱাৰে।</string>
+    <string msgid="6556509956452265614" name="common_google_play_services_update_button">আপডে’ট কৰক</string>
+    <string msgid="9053896323427875356" name="common_google_play_services_update_text">আপুনি Google Play সেৱাবোৰ আপডে’ট নকৰালৈকে %1$s নচলিব।</string>
+    <string msgid="6006316683626838685" name="common_google_play_services_update_title">Google Play সেৱা আপডে’ট কৰক</string>
+    <string name="common_google_play_services_updating_text">বৰ্তমান আপডে’ট হৈ থকা Google Play সেৱাসমূহৰ অবিহনে %1$s নচলিব৷</string>
+    <string name="common_google_play_services_wear_update_text">Google Play সেৱাসমূহৰ নতুন সংস্কৰণৰ প্ৰয়োজন৷ এইটো শীঘ্ৰেই নিজে-নিজে আপডে’ট হ’ব৷</string>
+    <string name="common_open_on_phone">ফ\'নত খোলক</string>
+    <string name="common_signin_button_text">ছাইন ইন কৰক</string>
+    <string name="common_signin_button_text_long">Googleৰ জৰিয়তে ছাইন ইন কৰক</string>
+    <string msgid="8038256446254964252" name="default_error_message">"অমান্য ইনপুট"</string>
+    <string msgid="6312721426453364202" name="default_popup_window_title">"পপ-আপ ৱিণ্ড’"</string>
+    <string msgid="1890207353314751437" name="dropdown_menu">"ড্ৰপডাউনৰ মেনু"</string>
+    <string msgid="6827826412747255547" name="in_progress">"প্ৰক্ৰিয়াকৰণ কৰি থকা হৈছে"</string>
+    <string msgid="7933458017204019916" name="indeterminate">"আংশিকভাৱে পৰীক্ষা কৰা হৈছে"</string>
+    <string msgid="542007171693138492" name="navigation_menu">"নেভিগেশ্বন মেনু"</string>
+    <string msgid="6610465462668679431" name="not_selected">"বাছনি কৰা হোৱা নাই"</string>
+    <string msgid="5941395253238309765" name="range_end">"পৰিসৰৰ সমাপ্তি"</string>
+    <string msgid="7097486360902471446" name="range_start">"পৰিসৰৰ আৰম্ভণি"</string>
+    <string msgid="6043586758067023" name="selected">"বাছনি কৰা হৈছে"</string>
+    <string msgid="4139871816613051306" name="state_empty">"খালী"</string>
+    <string msgid="5834637030682409883" name="state_off">"অফ আছে"</string>
+    <string msgid="1490883874751719580" name="state_on">"অন আছে"</string>
+    <string msgid="6277540029070332960" name="status_bar_notification_info_overflow">"৯৯৯+"</string>
+    <string msgid="2561197295334830845" name="switch_role">"ছুইচ"</string>
+    <string msgid="1672349317127674378" name="tab">"টেব"</string>
+    <string msgid="5946805113151406391" name="template_percent">"<ns1:g id="PERCENTAGE">%1$d</ns1:g> শতাংশ।"</string>
+    <string msgid="3765533235322692011" name="tooltip_description">"টুলটিপ"</string>
+    <string msgid="3124740595719787496" name="tooltip_label">"টুলটিপ দেখুৱাওক"</string>
+</resources>

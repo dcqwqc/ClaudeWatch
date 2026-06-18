@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Claude-themed palette -->
+    <color name="claude_black">@android:color/black</color>
+    <color name="claude_orange">#FFD97757</color>
+    <color name="splash_background">#FF0C0C0C</color>
+</resources>

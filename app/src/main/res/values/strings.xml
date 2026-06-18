@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Claude Watch</string>
+
+    <!-- Notification channel for "Claude is done" pushes -->
+    <string name="done_channel_id">claude_done</string>
+    <string name="done_channel_name">Claude finished</string>
+
+    <!-- Home -->
+    <string name="nav_usage">Usage</string>
+    <string name="nav_terminal">Terminal</string>
+    <string name="nav_voice">Voice</string>
+    <string name="nav_settings">Settings</string>
+
+    <!-- Usage -->
+    <string name="usage_5h">5-hour</string>
+    <string name="usage_week">Weekly</string>
+    <string name="usage_loading">Reading ccusage…</string>
+
+    <!-- Voice -->
+    <string name="voice_prompt_hint">Speak your prompt for Claude…</string>
+    <string name="voice_send">Send to Claude</string>
+
+    <!-- Settings -->
+    <string name="settings_host">Host</string>
+    <string name="settings_port">Port</string>
+    <string name="settings_user">User</string>
+    <string name="settings_key">Private key (PEM)</string>
+    <string name="settings_session">tmux session</string>
+    <string name="settings_5h_cap">5-hour token cap</string>
+    <string name="settings_week_cap">Weekly token cap</string>
+    <string name="settings_save">Save</string>
+</resources>
