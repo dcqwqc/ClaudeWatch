@@ -325,69 +325,146 @@ setup_hooks() {
     pause
 }
 
-setup_ssh_key() {
-    step "Step 6: Generating SSH Key for Watch..."
-    echo "   ClaudeWatch uses SSH (a secure encrypted connection) to link your watch"
-    echo "   to this PC. Think of it like a lock-and-key pair:"
-    echo "     • PRIVATE key → goes on your watch (keep this secret)"
-    echo "     • PUBLIC key  → stays on this PC (added to the allowed-connections list)"
-    echo "   You only need ONE key pair — it handles everything."
-    echo ""
+_keys_dir() { echo "$TARGET_DIR/keys"; }
 
-    local key_file="$TARGET_DIR/watch_key"
+_list_keys() {
+    local keys_dir; keys_dir=$(_keys_dir)
+    local found=false
+    for f in "$keys_dir"/*.pub 2>/dev/null; do
+        [ -f "$f" ] || continue
+        local label; label=$(basename "$f" .pub)
+        echo "     • $label  →  ${f%.pub}"
+        found=true
+    done
+    $found || echo "     (none yet)"
+}
 
-    if [ -f "$key_file" ]; then
-        warn "An SSH key already exists at: $key_file"
-        read -p "   Generate a fresh one? (y/N) " -n 1 -r; echo
-        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-            info "Keeping existing key."
-            _display_key_instructions "$key_file"
-            touch "$STATE_SSH_OK"; pause; return
-        fi
-        rm -f "$key_file" "${key_file}.pub"
-    fi
-
-    if ! command_exists ssh-keygen; then
-        warn "ssh-keygen not found. Please install OpenSSH:"
-        if $IS_WINDOWS; then
-            warn "  Run in PowerShell (Admin): Add-WindowsCapability -Online -Name OpenSSH.Client~~~~0.0.1.0"
-        else
-            warn "  sudo apt install openssh-client   (Debian/Ubuntu)"
-        fi
-        pause; return
-    fi
-
-    info "Generating secure SSH key (ed25519)..."
-    ssh-keygen -t ed25519 -f "$key_file" -N "" -C "ClaudeWatch" -q
-    chmod 600 "$key_file"
-
+_add_pub_to_authorized_keys() {
+    local pub_file="$1"
     mkdir -p "$HOME/.ssh"; chmod 700 "$HOME/.ssh"
     touch "$HOME/.ssh/authorized_keys"; chmod 600 "$HOME/.ssh/authorized_keys"
-    # Avoid duplicate entries
-    local pub_key; pub_key=$(cat "${key_file}.pub")
+    local pub_key; pub_key=$(cat "$pub_file")
     if ! grep -qF "$pub_key" "$HOME/.ssh/authorized_keys" 2>/dev/null; then
         echo "$pub_key" >> "$HOME/.ssh/authorized_keys"
         info "Public key added to ~/.ssh/authorized_keys"
     else
-        info "Public key already in ~/.ssh/authorized_keys"
+        info "Public key was already in ~/.ssh/authorized_keys"
     fi
+}
 
-    _display_key_instructions "$key_file"
-    touch "$STATE_SSH_OK"
-    pause
+_remove_pub_from_authorized_keys() {
+    local pub_file="$1"
+    local pub_key; pub_key=$(cat "$pub_file")
+    local tmp; tmp=$(mktemp)
+    grep -vF "$pub_key" "$HOME/.ssh/authorized_keys" > "$tmp" && mv "$tmp" "$HOME/.ssh/authorized_keys"
+    info "Public key removed from ~/.ssh/authorized_keys"
 }
 
 _display_key_instructions() {
-    local key_file="$1"
+    local key_file="$1" label="$2"
     echo ""
-    echo -e "   ${C_BOLD}Copy the PRIVATE KEY below into the ClaudeWatch app on your watch.${C_RESET}"
-    echo "   (Watch app → Settings → SSH Private Key, paste everything including dashes)"
+    echo -e "   ${C_BOLD}Device: $label${C_RESET}"
+    echo "   Copy the PRIVATE KEY below into the ClaudeWatch app on your device."
+    echo "   (App → Settings → SSH Private Key — paste everything, including the dashes)"
     echo ""
     echo -e "${C_YELLOW}"
     cat "$key_file"
     echo -e "${C_RESET}"
-    echo "   The key file is saved at: $key_file"
-    echo "   Run this step again at any time to display it again."
+    echo "   Key file: $key_file"
+}
+
+setup_ssh_key() {
+    step "Step 6: SSH Key Manager..."
+    echo "   Each device (watch, phone, etc.) connecting to this PC needs an SSH key."
+    echo "   Think of it as a lock-and-key pair:"
+    echo "     • PRIVATE key → goes on the device (keep secret)"
+    echo "     • PUBLIC key  → stays on this PC in the allowed-connections list"
+    echo ""
+    echo "   Using a SEPARATE key per device is recommended — if a device is lost,"
+    echo "   you can revoke just that key without affecting your other devices."
+    echo ""
+
+    if ! command_exists ssh-keygen; then
+        warn "ssh-keygen not found. Please install OpenSSH:"
+        $IS_WINDOWS && warn "  PowerShell (Admin): Add-WindowsCapability -Online -Name OpenSSH.Client~~~~0.0.1.0" \
+                     || warn "  sudo apt install openssh-client"
+        pause; return
+    fi
+
+    local keys_dir; keys_dir=$(_keys_dir)
+    mkdir -p "$keys_dir"
+
+    while true; do
+        echo ""
+        echo -e "   ${C_BOLD}Registered devices:${C_RESET}"
+        _list_keys
+        echo ""
+        echo "   [a] Add / generate key for a new device"
+        echo "   [d] Display / re-show a key (to set up another device)"
+        echo "   [r] Remove a key (revoke access for a device)"
+        echo "   [q] Done"
+        read -p "   Choice: " -n 1 key_choice; echo
+
+        case $key_choice in
+        a)
+            echo ""
+            echo "   Give this device a short label (e.g. 'Watch1', 'Watch2', 'Phone')."
+            read -r -p "   Device label: " label
+            label="${label// /_}"   # no spaces in filename
+            [ -z "$label" ] && { warn "Label cannot be empty."; continue; }
+            local key_file="$keys_dir/$label"
+            if [ -f "$key_file" ]; then
+                warn "A key for '$label' already exists."
+                read -p "   Overwrite it? (y/N) " -n 1 -r; echo
+                [[ ! $REPLY =~ ^[Yy]$ ]] && continue
+                _remove_pub_from_authorized_keys "${key_file}.pub"
+                rm -f "$key_file" "${key_file}.pub"
+            fi
+            info "Generating key for '$label'..."
+            ssh-keygen -t ed25519 -f "$key_file" -N "" -C "ClaudeWatch-$label" -q
+            chmod 600 "$key_file"
+            _add_pub_to_authorized_keys "${key_file}.pub"
+            _display_key_instructions "$key_file" "$label"
+            touch "$STATE_SSH_OK"
+            ;;
+        d)
+            echo ""
+            echo "   Enter the device label to display its key:"
+            _list_keys
+            read -r -p "   Label: " label
+            label="${label// /_}"
+            local key_file="$keys_dir/$label"
+            if [ ! -f "$key_file" ]; then
+                warn "No key found for '$label'. Check the label spelling above."
+            else
+                _display_key_instructions "$key_file" "$label"
+            fi
+            ;;
+        r)
+            echo ""
+            echo "   Enter the device label to REVOKE (removes access permanently):"
+            _list_keys
+            read -r -p "   Label: " label
+            label="${label// /_}"
+            local key_file="$keys_dir/$label"
+            if [ ! -f "$key_file" ]; then
+                warn "No key found for '$label'."
+            else
+                read -p "   Remove key for '$label'? This device will lose access. (y/N) " -n 1 -r; echo
+                if [[ $REPLY =~ ^[Yy]$ ]]; then
+                    _remove_pub_from_authorized_keys "${key_file}.pub"
+                    rm -f "$key_file" "${key_file}.pub"
+                    info "Key for '$label' removed."
+                    # If no keys left, clear the state marker
+                    [ -z "$(ls "$keys_dir"/*.pub 2>/dev/null)" ] && rm -f "$STATE_SSH_OK"
+                fi
+            fi
+            ;;
+        q|Q) break ;;
+        *) warn "Invalid option." ;;
+        esac
+        pause
+    done
 }
 
 # Connection setup helpers write results into these globals
