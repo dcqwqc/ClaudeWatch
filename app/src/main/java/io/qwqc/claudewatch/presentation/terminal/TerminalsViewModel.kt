@@ -6,6 +6,7 @@ import io.qwqc.claudewatch.Graph
 import io.qwqc.claudewatch.data.terminal.TerminalProfile
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
 /**
@@ -18,8 +19,17 @@ class TerminalsViewModel : ViewModel() {
     private val _terminals = MutableStateFlow<List<TerminalProfile>>(emptyList())
     val terminals = _terminals.asStateFlow()
 
+    /** Name of the active connection (which machine the terminals run on). */
+    private val _activeConnection = MutableStateFlow("")
+    val activeConnection = _activeConnection.asStateFlow()
+
     init {
         viewModelScope.launch { store.terminals.collect { _terminals.value = it } }
+        viewModelScope.launch {
+            combine(store.connections, store.activeConnectionId) { conns, activeId ->
+                conns.firstOrNull { it.id == activeId }?.name ?: ""
+            }.collect { _activeConnection.value = it }
+        }
     }
 
     /** Insert (new id) or update (existing id) a profile. */

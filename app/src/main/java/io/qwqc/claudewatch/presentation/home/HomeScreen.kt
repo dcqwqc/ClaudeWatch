@@ -59,6 +59,7 @@ fun HomeScreen(
     val terminalsVm: TerminalsViewModel = viewModel()
     val usage by usageVm.state.collectAsState()
     val terminals by terminalsVm.terminals.collectAsState()
+    val activeConnection by terminalsVm.activeConnection.collectAsState()
 
     // Auto-refresh usage on every full minute, while Home is on screen.
     LaunchedEffect(Unit) {
@@ -90,7 +91,7 @@ fun HomeScreen(
 
             item {
                 Text(
-                    text = "Terminals",
+                    text = if (activeConnection.isBlank()) "Terminals" else "Terminals · $activeConnection",
                     style = MaterialTheme.typography.caption1,
                     color = ClaudePalette.Sand,
                     modifier = Modifier.padding(top = 6.dp),

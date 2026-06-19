@@ -9,6 +9,10 @@ package io.qwqc.claudewatch.data.settings
  * Settings screen until the rings match what `/usage` reports in Claude Code.
  */
 data class Settings(
+    // Identity of the active connection these values came from, so save() can
+    // write edits back to the right ConnectionProfile in the list.
+    val connectionId: String = "default",
+    val connectionName: String = "Default",
     val host: String = "",
     val port: Int = 22,
     val user: String = "",

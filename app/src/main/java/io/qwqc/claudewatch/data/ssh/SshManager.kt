@@ -54,15 +54,28 @@ class SshManager(private val settingsStore: SettingsStore) {
     }
 
     private var cachedSession: Session? = null
+    /** Identity of the connection [cachedSession] was opened for. When the active
+     *  connection changes (different host/user/port/key) the signature differs and
+     *  we drop the stale session and reconnect to the new target. */
+    private var cachedSig: String? = null
     private val sessionLock = Any()
+
+    private fun signature(s: Settings): String =
+        "${s.user}@${s.host}:${s.port}#${s.privateKeyPem.hashCode()}"
 
     private fun getSession(s: Settings, connectTimeoutMs: Int): Session {
         synchronized(sessionLock) {
+            val sig = signature(s)
             val current = cachedSession
-            if (current != null && current.isConnected) {
+            if (current != null && current.isConnected && cachedSig == sig) {
                 return current
             }
-            
+            // Stale or pointed at a different connection — discard it.
+            if (current != null && cachedSig != sig) {
+                runCatching { current.disconnect() }
+                cachedSession = null
+            }
+
             require(s.isConfigured) { "SSH is not configured (host/user/private key missing)" }
             val jsch = JSch()
             val passphrase = s.keyPassphrase.takeIf { it.isNotBlank() }?.toByteArray()
@@ -78,6 +91,7 @@ class SshManager(private val settingsStore: SettingsStore) {
             }
             session.connect(connectTimeoutMs)
             cachedSession = session
+            cachedSig = sig
             return session
         }
     }
@@ -152,7 +166,7 @@ class SshManager(private val settingsStore: SettingsStore) {
                 )
             } catch (e: Exception) {
                 // If the session died, clear it so the next attempt starts fresh
-                synchronized(sessionLock) { if (cachedSession === session) cachedSession = null }
+                synchronized(sessionLock) { if (cachedSession === session) { cachedSession = null; cachedSig = null } }
                 throw e
             } finally {
                 channel.disconnect()
